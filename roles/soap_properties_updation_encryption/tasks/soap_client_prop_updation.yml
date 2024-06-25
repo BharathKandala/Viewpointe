@@ -1,0 +1,44 @@
+---
+- name: Backup soap.client.props for DMGR profile
+  ansible.builtin.copy:
+    src: "{{ properties_dir }}/{{ dmgr_profile_name }}/properties/{{ soap_client_props_file }}"
+    dest: "{{ properties_dir }}/{{ dmgr_profile_name }}/properties/{{ soap_client_props_file }}.bak"
+    backup: true
+    remote_src: true
+    mode: '0755'
+
+- name: Update soap.client.props for DMGR profile
+  ansible.builtin.replace:
+    path: "{{ properties_dir }}/{{ dmgr_profile_name }}/properties/{{ soap_client_props_file }}"
+    regexp: '^(com\.ibm\.SOAP\.loginUserid=).*'
+    replace: "com.ibm.SOAP.loginUserid={{ was_username }}"
+    backup: true
+
+- name: Update soap.client.props password for DMGR profile
+  ansible.builtin.replace:
+    path: "{{ properties_dir }}/{{ dmgr_profile_name }}/properties/{{ soap_client_props_file }}"
+    regexp: '^(com\.ibm\.SOAP\.loginPassword=).*'
+    replace: "com.ibm.SOAP.loginPassword={{ was_password }}"
+    backup: true
+
+- name: Backup soap.client.props for Node profile
+  ansible.builtin.copy:
+    src: "{{ properties_dir }}/{{ nodeagent_profile_name }}/properties/{{ soap_client_props_file }}"
+    dest: "{{ properties_dir }}/{{ nodeagent_profile_name }}/properties/{{ soap_client_props_file }}.bak"
+    backup: true
+    remote_src: true
+    mode: '0755'
+
+- name: Update soap.client.props for Node profile
+  ansible.builtin.replace:
+    path: "{{ properties_dir }}/{{ nodeagent_profile_name }}/properties/{{ soap_client_props_file }}"
+    regexp: '^(com\.ibm\.SOAP\.loginUserid=).*'
+    replace: "com.ibm.SOAP.loginUserid={{ was_username }}"
+    backup: true
+
+- name: Update soap.client.props password for Node profile
+  ansible.builtin.replace:
+    path: "{{ properties_dir }}/{{ nodeagent_profile_name }}/properties/{{ soap_client_props_file }}"
+    regexp: '^(com\.ibm\.SOAP\.loginPassword=).*'
+    replace: "com.ibm.SOAP.loginPassword={{ was_password }}"
+    backup: true

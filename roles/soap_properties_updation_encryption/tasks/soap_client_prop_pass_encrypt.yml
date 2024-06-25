@@ -1,0 +1,24 @@
+---
+- name: Encode password in DMGR profile soap.client.props
+  ansible.builtin.command: "sh {{ encoder_script }} {{ soap_client_props_file }} com.ibm.SOAP.loginPassword"
+  args:
+    chdir: "{{ properties_dir }}/{{ dmgr_profile_name }}/properties"
+  register: encode_pass
+  changed_when: encode_pass.rc != 0
+
+- name: Ensure soap.client.props in DMGR profile has NO world permissions
+  ansible.builtin.file:
+    path: "{{ properties_dir }}/{{ dmgr_profile_name }}/properties/{{ soap_client_props_file }}"
+    mode: "0640"
+
+- name: Encode password in Node profile soap.client.props
+  ansible.builtin.command: "sh {{ encoder_script }} {{ soap_client_props_file }} com.ibm.SOAP.loginPassword"
+  args:
+    chdir: "{{ properties_dir }}/{{ nodeagent_profile_name }}/properties"
+  register: encode_pass
+  changed_when: encode_pass.rc != 0
+
+- name: Ensure soap.client.props in Node profile has NO world permissions
+  ansible.builtin.file:
+    path: "{{ properties_dir }}/{{ nodeagent_profile_name }}/properties/{{ soap_client_props_file }}"
+    mode: "0640"

@@ -1,0 +1,12 @@
+# Execute the AdminTask.listServers command
+output = AdminTask.listServers('[-serverType APPLICATION_SERVER ]')
+
+# Split the output by newline characters to separate each server entry
+server_entries = output.split('\n')
+
+# Extract the server names by splitting each entry at the first parenthesis
+server_names = [entry.split('(')[0] for entry in server_entries]
+
+# Print the extracted server names
+for server_name in server_names:
+    print(server_name)

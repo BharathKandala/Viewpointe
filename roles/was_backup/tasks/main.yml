@@ -1,0 +1,37 @@
+---
+# tasks file for was_backup
+- name: Get Current Timestamp
+  set_fact:
+     timestamp: "{{ lookup('pipe','date +%d-%m-%Y-%H-%M-%S') }}"
+     
+- name: Get stats of backup_was dir
+  ansible.builtin.stat:
+    path: "{{ backup_was }}"
+  register: backup_dir
+
+- name: Create a directory if it does not exist {{ backup_was }}
+  ansible.builtin.file:
+    path: "{{ backup_was }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ was_owner }}"
+    group: "{{ was_group }}"
+  when: not backup_dir.stat.exists
+  
+- name: Get stats of backup_was dir after creating dir
+  ansible.builtin.stat:
+    path: "{{ backup_was }}"
+  register: backupwas_dir
+  
+- name: Get stats of WAS base path
+  ansible.builtin.stat:
+    path: "{{ was_base_path }}"
+  register: wasbasepath
+  
+- name: "Create a zip archive of {{ was_base_path }}"
+  community.general.archive:
+    path: "{{ was_base_path }}"
+    dest: "{{ backup_was }}/AppServer_{{ timestamp }}.zip"
+    format: zip
+  when: backupwas_dir.stat.exists and wasbasepath.stat.exists
+

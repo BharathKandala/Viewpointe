@@ -1,0 +1,51 @@
+---
+- name: Check the stat of login.info
+  ansible.builtin.stat:
+    path: "{{ was_business_banner_msg__was_install_location }}/properties/login.info"
+  register: st_login
+  
+- name: Remove the content from login.info
+  ansible.builtin.command: >
+    truncate -s 0 {{ was_business_banner_msg__was_install_location }}/properties/login.info
+  when: st_login.stat.exists
+
+- name: Edit login.info to add the business use notice
+  ansible.builtin.blockinfile:
+    path: "{{ was_business_banner_msg__was_install_location }}/properties/login.info"
+    block: |
+      NOTICE TO USERS
+                                                        
+                                                                                         
+      This computer system is the private property of Viewpointe and must only be used for conducting Viewpointe's business or for purposes authorized by Viewpointe management.
+
+      Users (authorized or unauthorized) have no explicit or implicit expectation of privacy.
+
+      Any or all uses of this system and all files on this system may be intercepted, monitored, recorded, copied, audited, inspected, and disclosed to authorized site, government and law enforcement personnel.
+
+      By using this system, the user consents to such interception, monitoring, recording, copying, auditing, inspection, and disclosure at the discretion of such personnel or officials. Unauthorized or improper use of this system may result in civil and criminal penalties and administrative or disciplinary action, as appropriate. By continuing to use this system you indicate your awareness of and consent to the terms and conditions of use. LOG OFF IMMEDIATELY if you do not agree to the conditions stated in this warning.
+  when: st_login.stat.exists
+
+- name: Check the stat of console.properties
+  ansible.builtin.stat:
+    path: "{{ was_business_banner_msg__was_install_location }}/systemApps/isclite.ear/config/console.properties"
+  register: st_console
+
+- name: Copy console.properties to backup
+  ansible.builtin.command: cp "{{ was_business_banner_msg__was_install_location }}/systemApps/isclite.ear/config/console.properties" "{{ was_business_banner_msg__was_install_location }}/systemApps/isclite.ear/config/console.properties.org"
+  when: st_console.stat.exists
+
+- name: Edit console.properties
+  ansible.builtin.blockinfile:
+    path: "{{ was_business_banner_msg__was_install_location }}/systemApps/isclite.ear/config/console.properties"
+    block: |
+      login.info=true
+      login.info.button=Accept
+  when: st_console.stat.exists
+
+- name: Remove unwanted lines
+  ansible.builtin.shell: "sed -i '/# BEGIN ANSIBLE MANAGED BLOCK/d' {{ was_business_banner_msg__was_install_location }}/properties/login.info"
+  when: st_login.stat.exists
+
+- name: Remove unwanted lines
+  ansible.builtin.shell: "sed -i '/^# END ANSIBLE MANAGED BLOCK$/d' {{ was_business_banner_msg__was_install_location }}/properties/login.info"
+  when: st_login.stat.exists

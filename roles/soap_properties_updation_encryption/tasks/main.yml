@@ -1,0 +1,23 @@
+---
+- name: "Verifiy if Profile already exists"
+  ansible.builtin.stat:
+    path: "{{ was_base_path }}/profiles/{{ profile_name }}Dmgr"
+  register: profile_already_exists
+
+- name: Verify if pid file
+  ansible.builtin.shell: ps -p `cat "{{ was_base_path }}/profiles/{{ profile_name }}/logs/dmgr/dmgr.pid"`
+  register: "dmgr_is_running"
+  ignore_errors: true
+  changed_when: dmgr_is_running.rc != 0
+  failed_when: false
+
+- name: "Check if stat exists {{ bin_directory }}"
+  ansible.builtin.stat:
+    path: "{{ bin_directory }}"
+  register: bin_dir
+
+- name: Include Soap client properties updation
+  ansible.builtin.include_tasks: soap_client_prop_updation.yml
+
+- name: Include security Audit creation
+  ansible.builtin.include_tasks: soap_client_prop_pass_encrypt.yml

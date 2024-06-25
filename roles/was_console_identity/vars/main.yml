@@ -1,0 +1,9 @@
+# ---
+# was_console_identity__node_profile_name: "{{ dmgr_profile_name | default(inventory_hostname_short ~ 'Dmgr') }}"
+# was_console_identity__was_install_location: "{{ was_install_location  | default('/usr/WebSphere9/AppServer') }}"
+# cell_name: "{{ was_console_identity__node_profile_name }}Cell"
+
+# bank_id: "st0"
+# app_name: "sc-t-{{ bank_id }}-apii01"
+# console_idenetity_string: "{{ app_name }} WAS Admin Console"
+# truncate_string_value: 50

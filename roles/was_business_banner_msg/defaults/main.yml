@@ -1,0 +1,2 @@
+---
+was_business_banner_msg__was_install_location: "{{ was_install_location | default('/usr/WebSphere9/AppServer') }}"

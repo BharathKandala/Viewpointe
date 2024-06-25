@@ -1,0 +1,9 @@
+# ---
+# was_server_start__was_install_location: "{{ was_install_location  | default('/usr/WebSphere9/AppServer') }}"
+# was_server_start__node_profile_name: "{{ nodeagent_profile_name | default(inventory_hostname_short) }}"
+# # was_server_start__servers:
+# #   - servera
+# log_dir: "/vpapp/logs/{{ bank_id }}/CG3-AccesspointeII"
+# log_grp: "wasloggp"
+# log_files:
+#   - application_server_list.j2

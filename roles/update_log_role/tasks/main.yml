@@ -1,0 +1,13 @@
+---
+- name: Update Log File
+  ansible.builtin.lineinfile:
+    path: "{{ log_status_file_dir }}"
+    regexp: '^(\s*- {{ item }}: )Pending'
+    line: '\1Completed'
+  loop: "{{ tasks_to_update }}"
+  when: "'{{ item }}: Completed' | default([])"
+  # delegate_to: localhost
+
+- name: Print updated log file
+  ansible.builtin.shell: cat "{{ log_status_file_dir }}"
+  # delegate_to: localhost

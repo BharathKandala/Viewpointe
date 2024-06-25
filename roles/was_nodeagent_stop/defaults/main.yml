@@ -1,0 +1,5 @@
+---
+# was_nodeagent_stop__node_profile_name: "{{ was_nodeagent_stop__node_profile_name | defaultinventory_hostname_short }}"
+# was_nodeagent_stop__was_install_location: "{{ was_install_location  | default('/usr/WebSphere9/AppServer') }}"
+was_nodeagent_stop__node_profile_name: "{{ nodeagent_profile_name | default(inventory_hostname_short) }}"
+was_nodeagent_stop__was_install_location: "{{ was_install_location | default('/usr/WebSphere9/AppServer') }}"

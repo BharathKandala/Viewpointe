@@ -1,0 +1,4 @@
+---
+# defaults file for was_backup
+was_base_path: "/usr/WebSphere9/AppServer"
+backup_was: "/home/usb-cg3-qa-wasadmin/backup_was"

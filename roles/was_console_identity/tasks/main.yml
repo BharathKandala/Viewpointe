@@ -1,0 +1,27 @@
+---
+# /usr/WebSphere9/AppServer/profiles/sc-q-autwas02Dmgr/config/cells/sc-q-autwas02DmgrCell/applications/isclite.ear/deployments/isclite/isclite.war/WEB-INF
+- name: Backup consoleProperties.xml
+  ansible.builtin.copy:
+    src: "{{ was_console_identity__was_install_location }}/profiles/{{ was_console_identity__node_profile_name }}/config/cells/{{ cell_name }}/applications/isclite.ear/deployments/isclite/isclite.war/WEB-INF/consoleProperties.xml"
+    dest: "{{ was_console_identity__was_install_location }}/profiles/{{ was_console_identity__node_profile_name }}/config/cells/{{ cell_name }}/applications/isclite.ear/deployments/isclite/isclite.war/WEB-INF/consoleProperties.xml.bak"
+    remote_src: true
+    mode: '0755'
+  register: backup_result
+
+- name: Update ISC.CONSOLE.ID value
+  ansible.builtin.replace:
+    path: "{{ was_console_identity__was_install_location }}/profiles/{{ was_console_identity__node_profile_name }}/config/cells/{{ cell_name }}/applications/isclite.ear/deployments/isclite/isclite.war/WEB-INF/consoleProperties.xml"
+    regexp: '(<consoleproperties:console-property\s+id="ISC.CONSOLE.ID"\s+value=").+(".*\/>)'
+    replace: '\g<1>ISC.CONSOLE.ID.CUSTOM\g<2>'
+
+- name: Update ISC.CONSOLE.ID.MAXLEN value
+  ansible.builtin.replace:
+    path: "{{ was_console_identity__was_install_location }}/profiles/{{ was_console_identity__node_profile_name }}/config/cells/{{ cell_name }}/applications/isclite.ear/deployments/isclite/isclite.war/WEB-INF/consoleProperties.xml"
+    regexp: '(<consoleproperties:console-property\s+id="ISC.CONSOLE.ID.MAXLEN"\s+value=").+(".*\/>)'
+    replace: '\g<1>{{ truncate_string_value }}\g<2>'
+
+- name: Update ISC.CONSOLE.ID.CUSTOM value
+  ansible.builtin.replace:
+    path: "{{ was_console_identity__was_install_location }}/profiles/{{ was_console_identity__node_profile_name }}/config/cells/{{ cell_name }}/applications/isclite.ear/deployments/isclite/isclite.war/WEB-INF/consoleProperties.xml"
+    regexp: '(<consoleproperties:console-property\s+id="ISC.CONSOLE.ID.CUSTOM"\s+value=").*(".*\/>)'
+    replace: '\1{{ console_idenetity_string }}\2'

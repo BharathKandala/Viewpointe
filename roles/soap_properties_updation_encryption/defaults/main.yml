@@ -1,0 +1,12 @@
+---
+dmgr_profile_name: "{{ inventory_hostname }}Dmgr"
+nodeagent_profile_name: "{{ inventory_hostname }}"
+was_username: "chandrabharath01"  # "usb-cg3-qa-wasadmin"
+was_password: "Welcome2ibm"
+soap_client_props_file: "soap.client.props"
+was_base_path: "/usr/WebSphere9/AppServer"
+properties_dir: "{{ was_base_path }}/profiles"
+
+#### Soap client encryption ######
+
+encoder_script: "../bin/PropFilePasswordEncoder.sh"
