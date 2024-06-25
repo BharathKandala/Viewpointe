@@ -1,0 +1,57 @@
+---
+# # Enable this role take backup of existing WAS
+# # - name: Import WAS Backup Playbook
+  # # ansible.builtin.import_playbook: was_backup.yml
+
+- name: Import Config Profile Playbook
+  import_playbook: config_profile.yml
+
+- name: Import Create Primary Admin User Playbook
+  import_playbook: create_primary_admin_user.yml
+
+- name: Import WAS Restart Playbook
+  import_playbook: was_restart.yml
+
+- name: Import WAS LDAP Config Playbook
+  import_playbook: was_ldap_config.yml
+
+- name: Import Create Users Playbook
+  import_playbook: create_users.yml
+
+- name: Import Assigning Roles to Users Playbook
+  import_playbook: assigning_roles_users.yml
+
+# Enable these roles for group creation(Lori suggested these roles are not required)
+# - name: Import Group Creation Playbook
+  # import_playbook: group_creation.yml
+
+# - name: Import Assigning Roles to Group Playbook
+  # import_playbook: assigning_roles_to_group.yml
+
+- name: Import SOAP Properties Updation Playbook
+  import_playbook: soap_properties_updation.yml
+
+- name: Import Config Audit Logging Playbook
+  import_playbook: config_audit_logging.yml
+
+- name: Import Config JVM Playbook
+  import_playbook: config_jvm.yml
+
+- name: Import Config VirtualHost Playbook
+  import_playbook: config_virtualhost.yml
+
+- name: Import WAS Config Console Identity Playbook
+  import_playbook: was_config_console_identity.yml
+
+- name: Import WAS Config Business Banner Message Playbook
+  import_playbook: was_config_business_banner_msg.yml
+
+# Enable this role for disabling the JSP Class Reload in existing Enterprise Application
+# - name: Import Disable JSP Reload Playbook
+  # import_playbook: disable_jsp_reload.yml
+  
+- name: Import App Server List Playbook
+  import_playbook: app_server_list.yml
+  
+- name: Import WAS Restart Playbook
+  import_playbook: was_restart.yml

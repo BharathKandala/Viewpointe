@@ -1,0 +1,32 @@
+---
+- name: Perform WAS Deployment sync nodes
+  hosts: all
+  become: true
+  become_user: "usb-cg3-qa-wasadmin"
+  vars_files:
+    - vars/main.yml
+  # tasks:
+  #   - name: Status of dmgr
+  #     ansible.builtin.include_role:
+  #       name: was_nodeagent_sync
+  #     # when: nodeagent_sync == "start"
+
+
+  tasks:
+    # - name: Status of the application servers
+    #   ansible.builtin.include_role:
+    #     name: was_server_status
+    #   when: app_status == "application_server_status"
+
+##### log file generation for each role #####
+
+    - name: Run soap properties updation part
+      include_role:
+        name: was_nodeagent_sync
+      register: was_nodeagent_sync_result
+      ignore_errors: yes
+      
+    - name: Log other_role_or_task result
+      ansible.builtin.lineinfile:
+        path: "{{ log_status_file_dir }}"
+        line: "Was Nodeagent  sync Status: {{ 'Completed' if was_nodeagent_sync_result is succeeded else 'Failed' }}"

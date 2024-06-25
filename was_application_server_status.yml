@@ -1,0 +1,31 @@
+---
+- name: Perform WAS Deployment manager status task
+  hosts: all
+  become: true
+  become_user: "usb-cg3-qa-wasadmin"  
+  vars_files:
+    - vars/main.yml
+  tasks:
+    # - name: Status of the application servers
+    #   ansible.builtin.include_role:
+    #     name: was_server_status
+    #   when: app_status == "application_server_status"
+
+##### log file generation for each role #####
+
+    - name: Ensure log file exists
+      ansible.builtin.file:
+        path: "{{ log_status_file_dir }}"
+        state: touch
+
+    - name: Run soap properties updation part
+      include_role:
+        name: was_server_status
+      register: app_server_status_result
+      ignore_errors: yes
+      when: app_status == "application_server_status"
+
+    - name: Log other_role_or_task result
+      ansible.builtin.lineinfile:
+        path: "{{ log_status_file_dir }}"
+        line: "Application Servers Status: {{ 'Completed' if app_server_status_result is succeeded else 'Failed' }}"

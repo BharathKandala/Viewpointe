@@ -1,0 +1,22 @@
+---
+- name: "Configure Profiles in WAS"
+  hosts: all
+  become: true
+  become_user: usb-cg3-qa-wasadmin
+  tasks:
+    - name: Ensure log file exists
+      ansible.builtin.file:
+        path: "{{ log_status_file_dir }}"
+        state: touch
+        mode: '0755'
+
+    - name: Run updation part
+      ansible.builtin.include_role:
+        name: was-create-profiles
+      register: profile_create
+      ignore_errors: true
+
+    - name: Log other_role_or_task result
+      ansible.builtin.lineinfile:
+        path: "{{ log_status_file_dir }}"
+        line: "Application profile creation Status: {{ 'Completed' if profile_create is succeeded else 'Failed' }}"

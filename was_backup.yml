@@ -1,0 +1,7 @@
+---
+- name: "Create WAS Backup"
+  hosts: all
+  roles:
+    - role: was_backup
+      become: true
+      become_user: "usb-cg3-qa-wasadmin"

@@ -1,0 +1,19 @@
+---
+- name: "Configure console identity in WAS"
+  hosts: all
+  become: true
+  become_user: usb-cg3-qa-wasadmin
+  vars_files:
+    - vars/main.yml
+
+  tasks:
+    - name: Run soap properties updation part
+      ansible.builtin.include_role:
+        name: was_console_identity
+      register: console_identity_result
+      ignore_errors: true
+
+    - name: Log other_role_or_task result
+      ansible.builtin.lineinfile:
+        path: "{{ log_status_file_dir }}"
+        line: "Console identity Status: {{ 'Completed' if console_identity_result is succeeded else 'Failed' }}"

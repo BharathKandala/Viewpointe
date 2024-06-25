@@ -1,0 +1,47 @@
+---
+- name: "Create Audit logging"
+  hosts: all
+  pre_tasks:
+    ######## Audit log encryption #############
+    - name: Check if /vpapp directory exists
+      become: true
+      ansible.builtin.stat:
+        path: /vpapp
+      register: vpapp_dir
+
+    - name: Create WAS-securityaudit directory in /vpapp if it exists
+      become: true
+      when: vpapp_dir.stat.exists
+      ansible.builtin.file:
+        path: /vpapp/WAS-securityaudit
+        state: directory
+        owner: "{{ was_owner }}" 
+        group: "{{ was_group }}"
+        mode: '0755'
+
+    - name: Create WAS-securityaudit directory in /usr/WebSphere9 if /vpapp does not exist
+      become: true
+      when: not vpapp_dir.stat.exists
+      ansible.builtin.file:
+        path: /usr/WebSphere9/WAS-securityaudit
+        state: directory
+        owner: "{{ was_owner }}" 
+        group: "{{ was_group }}"
+        mode: '0755'
+
+    - name: Copy the wildcard.p12 certificate to the appropriate directory
+      become: true
+      ansible.builtin.copy:
+        src: "{{ certificate_path }}/{{ certificate_filename }}"
+        dest: "{{ '/vpapp/WAS-securityaudit/' if vpapp_dir.stat.exists else '/usr/WebSphere9/WAS-securityaudit/' }}{{ certificate_filename }}"
+        owner: "{{ was_owner }}" 
+        group: "{{ was_group }}"
+        mode: '0644'
+        remote_src: true
+
+    #############
+  roles:
+    - role: was-audit-loggining
+      become: true
+      become_user: "usb-cg3-qa-wasadmin"
+

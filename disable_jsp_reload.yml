@@ -1,0 +1,12 @@
+---
+- name: "Disable JSP Class Reload in EnterPrise Application"
+  hosts: all
+  roles:
+    - role: was-disable-jsp
+      become: true
+      become_user: "usb-cg3-qa-wasadmin"
+      when: 'enterprise_application_name != ""'
+
+- name: Restart thr JVM
+  import_playbook: app_server_list.yml
+  when: 'enterprise_application_name != ""'

@@ -1,0 +1,33 @@
+---
+- name: "JVM Configuration using Jython Scripts"
+  hosts: all
+  vars:
+    jvm_config: 'Pending'
+  pre_tasks:
+    - name: Check if the log directory exists
+      become: true
+      ansible.builtin.stat:
+        path: "{{ log_dir }}"
+      register: log_dir_stat
+
+    - name: Create the log directory with the correct permissions, ownership, and group if it does not exist
+      become: true
+      ansible.builtin.file:
+        path: "{{ log_dir }}"
+        state: directory
+        mode: '2750'
+        owner: "{{ was_username }}"
+        group: "{{ log_grp }}"
+        recurse: true
+      when: not log_dir_stat.stat.exists
+
+    - name: Ensure the log directory is owned by group wasloggp
+      become: true
+      ansible.builtin.file:
+        path: "{{ log_dir }}"
+        group: "{{ log_grp }}"
+        recurse: true
+  roles:
+    - role: was-config-jvm
+      become: true
+      become_user: "usb-cg3-qa-wasadmin"

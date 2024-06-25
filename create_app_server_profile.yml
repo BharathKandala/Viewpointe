@@ -1,0 +1,27 @@
+---
+- name: "Create APp server profile"
+  hosts: all
+  become: true
+  become_user: usb-cg3-qa-wasadmin
+  # roles:
+  #   - was-create-appserver-profile
+
+
+  tasks:
+    # - name: Status of the application servers
+    #   ansible.builtin.include_role:
+    #     name: was_server_status
+    #   when: app_status == "application_server_status"
+
+##### log file generation for each role #####
+
+    - name: Run updation part
+      include_role:
+        name: was-create-appserver-profile
+      register: app_server_result
+      ignore_errors: yes
+      
+    - name: Log other_role_or_task result
+      ansible.builtin.lineinfile:
+        path: "{{ log_status_file_dir }}"
+        line: "Was App server creation users creation Status: {{ 'Completed' if app_server_result is succeeded else 'Failed' }}" 

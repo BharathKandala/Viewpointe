@@ -1,0 +1,102 @@
+master_config:
+  hosts:
+    sc-q-autwas01:
+      ansible_host: 10.10.120.230
+      ansible_user: bharath.kandala-ibm
+      ansible_ssh_pass: JoelPrince@27 # for demo purpose
+      ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+      was_base_path: "/usr/WebSphere9/AppServer"
+      was_username: "usb-cg3-qa-wasadmin"
+      was_password: "Welcome2VPT" # for demo purpose
+      was_owner: "usb-cg3-qa-wasadmin"
+      was_group: "usb-was-grp"
+
+      ldap_server: owgb8qwmcd9ug9n.vptocsdev.net
+      ldap_alias: ldapserver
+      ldap_repo: viewpointeLDAP
+      ldap_bind_user: vpt-was-dev-bind@vptocsdev.net
+      ldap_bind_pass: '#EDC4rfv%TGB' # for demo purpose only
+      ldap_realm: DC=vptocsdev1,DC=net1
+      ldap_ssl: true
+      ldap_ssl_port: "636"
+      appserver_jvm_initial_heap_size: "512"
+      appserver_jvm_maximum_heap_size: "1024"
+      dmgr_initial_heap_size: EMPTY
+      dmgr_maximum_heap_size: EMPTY
+      nodeagent_initial_heap_size: "512"
+      nodeagent_maximum_heap_size: "2048"
+      bank_id: "ST0"
+    
+      APPSERVER_BOOTSTRAP_ADDRESS: 9200
+      APPSERVER_CSIV2_SSL_MUTUALAUTH_LISTENER_ADDRESS: 9202
+      APPSERVER_CSIV2_SSL_SERVERAUTH_LISTENER_ADDRESS: 9203
+      APPSERVER_DCS_UNICAST_ADDRESS: 9204
+      APPSERVER_IPC_CONNECTOR_ADDRESS: 9205
+      APPSERVER_ORB_LISTENER_ADDRESS: 9206
+      APPSERVER_OVERLAY_TCP_LISTENER_ADDRESS: 9207
+      APPSERVER_OVERLAY_UDP_LISTENER_ADDRESS: 9208
+      APPSERVER_SAS_SSL_SERVERAUTH_LISTENER_ADDRESS: 9209
+      APPSERVER_SIB_ENDPOINT_ADDRESS: 9210
+      APPSERVER_SIB_ENDPOINT_SECURE_ADDRESS: 9211
+      APPSERVER_SIB_MQ_ENDPOINT_ADDRESS: 9212
+      APPSERVER_SIB_MQ_ENDPOINT_SECURE_ADDRESS: 9213
+      APPSERVER_SIP_DEFAULTHOST: 9214
+      APPSERVER_SIP_DEFAULTHOST_SECURE: 9215
+      APPSERVER_SOAP_CONNECTOR_ADDRESS: 9216
+      APPSERVER_WC_adminhost: 9217
+      APPSERVER_WC_adminhost_secure: 9218
+      APPSERVER_WC_defaulthost: 9219
+      APPSERVER_WC_defaulthost_secure: 9220 
+
+      # for new set up of Node agent and DMGR refer user guide
+      users_list_json:
+        - username: Lakshmi
+          password: Welcome2VPT # for demo purpose only
+          email: Lakshmiviewpoint@viewpointe.com
+          roles: 
+            - "adminsecuritymanager"
+            - "administrator"
+            - "auditor"
+            - "configurator"
+            - "deployer"
+            - "iscadmins"
+            - "monitor"
+            - "operator"
+        - username: Ameer
+          password: Welcome2VPT # for demo purpose only
+          email: Ameerviewpoint@viewpointe.com
+          roles: 
+            - "adminsecuritymanager"
+            - "administrator"
+            - "auditor"
+        - username: Lori
+          password: Welcome2VPT # for demo purpose only
+          email: Loriviewpoint@viewpointe.com
+          roles: 
+            - "administrator"
+            - "monitor"
+            - "operator"
+            - "auditor"
+      
+      # users_list_json:
+      #   - username: Lakshmi
+      #     password: Welcome2VPT # for demo purpose only
+      #     email: Lakshmiviewpoint@viewpointe.com
+      #   - username: Ameer
+      #     password: Welcome2VPT # for demo purpose only
+      #     email: Ameerviewpoint@viewpointe.com
+      #   - username: Lori
+      #     password: Welcome2VPT # for demo purpose only
+      #     email: Loriviewpoint@viewpointe.com
+      
+      group_name: "SIT-Sceniq-SolutionEngineers@defaultRealm"
+      group_description: "a_group_of_admins"
+      sit_port: '65443'
+      internal_ihs_port: '11443'
+      customer_facing_port: '443'
+
+    # server2.example.com:
+    #   ansible_host: 192.168.1.11
+    #   ansible_user: ubuntu
+    #   custom_var1: value3
+    #   custom_var2: value4

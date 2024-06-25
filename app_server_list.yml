@@ -1,0 +1,33 @@
+---
+- name: "List of App servers and start the servers"
+  hosts: all
+  become: true
+  become_user: usb-cg3-qa-wasadmin
+  roles:
+    - { role: was_server_stop }
+
+  tasks:
+    - name: Run updation part
+      ansible.builtin.include_role:
+        name: was_server_start
+      register: was_servers_restart_reg
+      ignore_errors: true
+
+    - name: Log other_role_or_task result
+      ansible.builtin.lineinfile:
+        path: "{{ log_status_file_dir }}"
+        line: "was servers restart  Status: {{ 'Completed' if was_servers_restart_reg is succeeded else 'Failed' }}"
+
+    - name: Print updated log file
+      ansible.builtin.command: cat "{{ log_status_file_dir }}"
+      register: cat_results
+      changed_when: cat_results.rc != 0
+      
+    - name: Remove file {{ log_status_file_dir }}
+      ansible.builtin.file:
+        path: "{{ log_status_file_dir }}"
+        state: absent
+
+    - name: Print Result of Log file
+      ansible.builtin.debug:
+        msg: "{{ cat_results.stdout_lines }}"

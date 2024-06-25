@@ -1,0 +1,39 @@
+---
+- name: "Create users"
+  hosts: all
+  become: true
+  become_user: usb-cg3-qa-wasadmin
+  vars_files:
+    - vars/main.yml
+  roles:
+  - { role: was-createusers }
+  - { role: was-userrole-assigning }
+  - { role: was-group-creation }
+  - { role: was-group-creation }
+  - { role: soap_properties_updation_encryption }
+
+  - { role: was_nodeagent_stop }
+  - { role: was_stop_dmgr }
+  - { role: was_start_dmgr }
+  # - { role: was_nodeagent_start }
+
+
+  tasks:
+    # - name: Status of the application servers
+    #   ansible.builtin.include_role:
+    #     name: was_server_status
+    #   when: app_status == "application_server_status"
+
+##### log file generation for each role #####
+
+    - name: Run updation part
+      include_role:
+        name: was_nodeagent_start
+      register: users_roles_groups_result
+      ignore_errors: yes
+      
+    - name: Log other_role_or_task result
+      ansible.builtin.lineinfile:
+        path: "{{ log_status_file_dir }}"
+        line: "Was users and groups roles Status: {{ 'Completed' if users_roles_groups_result is succeeded else 'Failed' }}" 
+

@@ -1,0 +1,17 @@
+---
+- name: "Creating group"
+  hosts: all
+  become: true
+  become_user: usb-cg3-qa-wasadmin
+
+  tasks:
+    - name: Run updation part
+      ansible.builtin.include_role:
+        name: was-grouprole-assigning
+      register: gorup_role_reg
+      ignore_errors: true
+
+    - name: Log other_role_or_task result
+      ansible.builtin.lineinfile:
+        path: "{{ log_status_file_dir }}"
+        line: "Group_role assigning Status: {{ 'Completed' if gorup_role_reg is succeeded else 'Failed' }}"

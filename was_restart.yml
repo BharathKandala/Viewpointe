@@ -1,0 +1,23 @@
+---
+- name: "Restarting the server"
+  hosts: all
+  become: true
+  become_user: usb-cg3-qa-wasadmin
+  vars_files:
+    - vars/main.yml
+  roles:
+    - { role: was_nodeagent_stop }
+    - { role: was_stop_dmgr }
+    - { role: was_start_dmgr }
+  tasks:
+    - name: Run soap properties updation part
+      ansible.builtin.include_role:
+        name: was_nodeagent_start
+      register: was_nodeagent_start_result
+      ignore_errors: true
+
+    - name: Log other_role_or_task result
+      ignore_errors: true
+      ansible.builtin.lineinfile:
+        path: "{{ log_status_file_dir }}"
+        line: "Was Restart Status: {{ 'Completed' if was_nodeagent_start_result is succeeded else 'Failed' }}"

@@ -1,0 +1,138 @@
+- name: Configure SSL for IBM WebSphere
+  hosts: all
+  vars:
+    admin_user: "usb-cg3-qa-wasadmin"
+    admin_password: "Welcome2ibm"
+    was_base_path: "/usr/WebSphere9/AppServer"
+    was_username: "usb-cg3-qa-wasadmin"
+    was_password: "Welcome2ibm"
+    profile_name: "sc-q-autwas01"
+    bin_directory: "{{ was_base_path }}/profiles/{{ profile_name }}/bin"
+    personal_cert: "wildcardWithChain-newpassword.p12"
+    key_password: "CxlmKy5qKWw"
+    key_file_path: "/var/tmp/wildcardWithChain-newpassword.p12"
+    key_file_password: "{{ key_password }}"
+    key_file_type: "PKCS12"
+    alias_from_key_file: "wildcard-cert"
+    key_store_name: "NodeDefaultKeyStore" #"CellDefaultKeyStore"
+    cell: "sc-q-autwas01DmgrCell"
+    node: "sc-q-autwas01Node"
+    key_store_password: "{{ key_password }}"
+    cert_alias: "wildcard-cert"
+    #alias_in_key_store: "wildcard_certificate_new"
+    wsadmin_path: "/usr/WebSphere9/AppServer/bin/wsadmin.sh"
+    ssl_config_path: "/var/tmp/ssl_config.py"  # Ensure this is correctly defined
+    signer_cert_path: "/placholder/ad_signer_certificate.crt"  # Update with the actual path to the AD Signer certificate
+    signer_cert_alias: "vptocdev_ad_signer"
+
+  tasks:
+    - name: Verify wsadmin.sh path
+      become: yes
+      stat:
+        path: "{{ wsadmin_path }}"
+      register: wsadmin_stat
+
+    - name: Debug wsadmin.sh path
+      debug:
+        msg: "wsadmin.sh path exists: {{ wsadmin_stat.stat.exists }}"
+
+    - name: Ensure wsadmin.sh is executable
+      become: yes
+      file:
+        path: "{{ wsadmin_path }}"
+        mode: '0755'
+      when: wsadmin_stat.stat.exists 
+
+    # - name: Copy the Jython script to the WebSphere server
+      # become: yes
+      # copy:
+        # src: "{{ ssl_config_path }}"
+        # dest: /tmp/ssl_config.py
+        # mode: '0755'
+
+    - name: Ensure wsadmin.sh exists in bin directory
+      become: yes
+      stat:
+        path: "{{ bin_directory }}/wsadmin.sh"
+      register: wsadmin_path
+
+    - name: Fail if wsadmin.sh does not exist in bin directory
+      fail:
+        msg: "wsadmin.sh not found in {{ bin_directory }}"
+      when: not wsadmin_path.stat.exists
+
+    - name: Ensure wsadmin.sh in bin directory is executable
+      become: yes
+      file:
+        path: "{{ bin_directory }}/wsadmin.sh"
+        mode: '0755'
+
+    - name: Ensure key store file exists
+      become: yes
+      stat:
+        path: "{{ key_file_path }}"
+      register: keystore_path
+
+    - name: Fail if key store file does not exist
+      fail:
+        msg: "Key store file not found at {{ key_file_path }}"
+      when: not keystore_path.stat.exists
+
+    - name: List aliases in the keystore using wsadmin
+      become: yes
+      command: >
+        {{ bin_directory }}/wsadmin.sh -user {{ was_username }} -password {{ was_password }} -lang jython -c "print AdminTask.listKeyFileAliases('[-keyFilePath {{ key_file_path }} -keyFilePassword {{ key_file_password }} -keyFileType {{ key_file_type }}]')"
+      register: wsadmin_list_aliases
+
+    - name: Display aliases from wsadmin
+      debug:
+        var: wsadmin_list_aliases
+
+    - name: Ensure an alias is found
+      fail:
+        msg: "No aliases found in the keystore"
+      when: wsadmin_list_aliases.stdout == ""
+
+    - name: Remove existing alias if present
+      become: yes
+      command: >
+        {{ bin_directory }}/wsadmin.sh -user {{ was_username }} -password {{ was_password }} -lang jython -c "AdminTask.deleteCertificate('[-certificateAlias {{ alias_from_key_file }} -keyStoreName {{ key_store_name }} -keyStoreScope (cell):{{ cell }}:(node):{{ node }}]'); AdminConfig.save()"
+      ignore_errors: yes
+      when: "'{{ alias_from_key_file }}' in wsadmin_list_aliases.stdout"
+
+    - name: Execute the Jython script to import certificate
+      become: yes
+      command: >
+        {{ bin_directory }}/wsadmin.sh -user {{ was_username }} -password {{ was_password }} -lang jython -c "AdminTask.importCertificate('[-keyFilePath {{ key_file_path }} -keyFilePassword {{ key_file_password }} -keyFileType {{ key_file_type }} -certificateAliasFromKeyFile {{ alias_from_key_file }} -keyStoreName {{ key_store_name }} -keyStoreScope (cell):{{ cell }}:(node):{{ node }}]'); AdminConfig.save()"
+      register: import_cert_result
+
+    - name: Check import result
+      debug:
+        msg: "Import result: {{ import_cert_result.stdout }}"
+
+    # Placeholder for AD Signer certificate
+    # - name: Add AD Signer certificate to CellDefaultTrustStore
+    #   become: yes
+    #   command: >
+    #     {{ bin_directory }}/wsadmin.sh -user {{ was_username }} -password {{ was_password }} -lang jython -c "AdminTask.addSignerCertificate('[-keyStoreName CellDefaultTrustStore -keyStoreScope (cell):{{ cell }} -certificateAlias {{ signer_cert_alias }} -certificateFilePath {{ signer_cert_path }}]'); AdminConfig.save()"
+    #   register: add_ad_signer_result
+
+    # - name: Check AD Signer add result
+    #   debug:
+    #     msg: "AD Signer add result: {{ add_ad_signer_result.stdout }}"
+
+    - name: Execute the Jython script to update SSL configuration
+      become: yes
+      command: >
+        {{ bin_directory }}/wsadmin.sh -user {{ was_username }} -password {{ was_password }} -lang jython -c "
+        cellDefaultSSLSettings = AdminConfig.getid('/Cell:{{ cell }}/SSLConfig:CellDefaultSSLSettings/')
+        AdminConfig.modify(cellDefaultSSLSettings, [['sslProtocol', 'TLSv1.2'], ['enabledCiphers', '[TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384, TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384, TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256]']])
+        nodeDefaultSSLSettings = AdminConfig.getid('/Cell:{{ cell }}/Node:{{ node }}/SSLConfig:NodeDefaultSSLSettings/')
+        AdminConfig.modify(nodeDefaultSSLSettings, [['sslProtocol', 'TLSv1.2'], ['enabledCiphers', '[TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384, TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384, TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256]']])
+        AdminConfig.save()"
+      register: update_ssl_result
+
+    - name: Check SSL configuration result
+      debug:
+        msg: "SSL configuration result: {{ update_ssl_result.stdout }}"
+
