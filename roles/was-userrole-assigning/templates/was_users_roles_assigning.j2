@@ -1,0 +1,24 @@
+import sys
+
+def map_user_roles(userID, roles):
+    # Define the base access ID with the userID
+    accessID = 'user:defaultWIMFileBasedRealm/uid={},o=defaultWIMFileBasedRealm'.format(userID)
+    
+    # Mapping user to the specified roles
+    for role in roles:
+        role = role.strip('"')  # Remove quotes around the role
+        if role in ['adminsecuritymanager', 'administrator', 'configurator', 'deployer', 'iscadmins', 'monitor', 'operator']:
+            AdminTask.mapUsersToAdminRole('[-accessids [{}] -userids [{}] -roleName "{}"]'.format(accessID, userID, role))
+        elif role == 'auditor':
+            AdminTask.mapUsersToAuditRole('[-accessids [{}] -userids [{}] -roleName "{}"]'.format(accessID, userID, role))
+    
+    # Save the configuration
+    AdminConfig.save()
+    print("Configuration saved successfully.")
+
+# Get the username and roles from the command-line arguments
+username = sys.argv[0]
+roles = sys.argv[1].split(',')
+
+# Call the function to execute the role mappings with the provided username and roles
+map_user_roles(username, roles)

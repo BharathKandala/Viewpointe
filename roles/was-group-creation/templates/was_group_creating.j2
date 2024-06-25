@@ -1,0 +1,16 @@
+import sys
+
+def create_group(group_name, group_description):
+    # Create the group with the specified CN and description
+    AdminTask.createGroup(['-cn', group_name, '-description', group_description])
+    
+    # Save the configuration
+    AdminConfig.save()
+    print("Configuration saved successfully.")
+
+# Get the group CN and description from the command-line arguments
+group_name = sys.argv[0]
+group_description = sys.argv[1]
+
+# Call the function to create the group with the provided CN and description
+create_group(group_name, group_description)

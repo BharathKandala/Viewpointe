@@ -1,0 +1,19 @@
+---
+dmgr_profile_name: "{{ inventory_hostname }}Dmgr"
+was_base_path: "/usr/WebSphere9/AppServer"
+was_username: "usb-cg3-qa-wasadmin"
+was_password: "Welcome2ibm"
+bin_directory: "{{ was_base_path }}/profiles/{{ inventory_hostname }}/bin"
+was_owner: "usb-cg3-qa-wasadmin"
+was_group: "usb-was-grp"
+was_bin_dir: "{{ was_base_path }}/profiles/{{ appserver_profile_name }}/bin"
+template_jsp: "was_disable_jsp_webentreprise_application.j2"
+response_jsp: "{{ bin_directory }}/was_disable_jsp_webentreprise_application.py"
+
+# # Arguments for disabling JSP class reload
+# enterprise_application_name: "SinglePageApp_war"
+# web_module_name: "SimpleWebApp"
+# filename_app_related: "SinglePageApp.war" # Specify the EAR, WAR, JAR, or SAR module
+# reload_option: "No"
+
+# command_line_arg_for_jsp_class_reload: '{{ enterprise_application_name }} {{ web_module_name }} {{ filename_app_related }} {{ reload_option }}'

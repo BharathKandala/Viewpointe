@@ -1,0 +1,31 @@
+# Importing necessary packages
+import sys
+
+# Function to edit the application
+def edit_app(app_name, web_mod_name, filename, web_mod_path, reload_option, timeout):
+    # Constructing the AdminApp.edit command
+    command = "AdminApp.edit('" + app_name + "', '[ -JSPReloadForWebMod [[ " + web_mod_name + " " + filename + "," + web_mod_path + " AppDeploymentOption." + reload_option + " " + timeout + " ]]]' )"
+    
+    # Printing the command (for debugging purposes)
+    print("Executing command: " + command)
+    
+    # Execute the command (Uncomment the following line in the actual Jython environment)
+    exec(command)
+    
+    # Assuming we save changes if this was a configuration change
+    AdminConfig.save()
+    print("Disable JSP class reloading in Enteprsie Application Server executed successfully.")
+
+
+# Input Variables
+timeout = "10"
+web_mod_path = "WEB-INF/web.xml"
+app_name = sys.argv[0]
+web_mod_name = sys.argv[1]
+filename = sys.argv[2]
+reload_option = sys.argv[3]
+    
+# Call function to edit the application
+edit_app(app_name, web_mod_name, filename, web_mod_path, reload_option, timeout)
+
+#sh wsadmin.sh -lang jython -username "usb-cg3-qa-wasadmin" -password "Welcome2ibm" -f jsp.py "SinglePageApp_war" "SimpleWebApp" "SinglePageApp.war" "No"

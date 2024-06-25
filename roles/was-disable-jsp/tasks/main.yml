@@ -1,0 +1,44 @@
+---
+- name: "Verifiy if Profile already exists"
+  ansible.builtin.stat:
+    path: "{{ was_base_path }}/profiles/{{ dmgr_profile_name }}"
+  register: profile_already_exists
+
+- name: Verify if pid file
+  ansible.builtin.shell: ps -p `cat "{{ was_base_path }}/profiles/{{ dmgr_profile_name }}/logs/dmgr/dmgr.pid"`
+  register: "dmgr_is_running"
+  ignore_errors: true
+  failed_when: false
+  changed_when: dmgr_is_running.rc != 0
+
+- name: "Check if stat exists {{ bin_directory }}"
+  ansible.builtin.stat:
+    path: "{{ bin_directory }}"
+  register: bin_dir
+
+- name: "Generate Response file"
+  ansible.builtin.template:
+    src: "{{ template_jsp }}"
+    dest: "{{ response_jsp }}"
+    owner: "{{ was_owner }}"
+    group: "{{ was_group }}"
+    mode: '0755'
+  when: bin_dir.stat.exists
+
+- name: "Disable JSP Class reloading in Enterprise Application"
+  ansible.builtin.command: >
+    sh wsadmin.sh -lang jython -username {{ was_username }} -password {{ was_password }} -f {{ response_jsp }} {{ command_line_arg_for_jsp_class_reload }}
+  register: disable_jsp_output
+  args:
+    chdir: "{{ bin_directory }}"
+  changed_when: disable_jsp_output.rc == 0
+
+- name: "Print  result of Disable JSP"
+  ansible.builtin.debug:
+    msg: "{{ disable_jsp_output }}"
+  when: disable_jsp_output.rc == 0
+
+- name: "Purge Response file"
+  ansible.builtin.file:
+    path: "{{ response_jsp }}"
+    state: absent

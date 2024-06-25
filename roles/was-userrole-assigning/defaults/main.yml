@@ -1,0 +1,18 @@
+---
+log_dir: "/vpapp/logs/{{ bank_id }}/CG3-AccesspointeII"
+log_grp: "wasloggp"
+log_files:
+  - was_users_roles_assigning.j2
+
+# users_list_json:
+#   - username: bharath
+#     password: Welcome2ibm
+#     email: bharathviewpoint@netflix.com
+#   - username: prakash
+#     password: Welcome2ibmprakash
+#     email: prakashviewpoint@viewpointe.com
+#   - username: Lorry
+#     password: Welcome2ibmLorry
+#     email: Lorryviewpoint@viewpointe.com
+
+# # if you want to add more users you can replicate same like above users

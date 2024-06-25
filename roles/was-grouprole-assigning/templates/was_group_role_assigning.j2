@@ -1,0 +1,19 @@
+import sys
+
+def map_group_roles(group_cn, roles):
+    access_id = 'group:defaultWIMFileBasedRealm/cn={},o=defaultWIMFileBasedRealm'.format(group_cn)
+    group_id = '{}@defaultWIMFileBasedRealm'.format(group_cn)
+    
+    for role in roles:
+        AdminTask.mapGroupsToAdminRole('[-roleName {} -accessids [{}] -groupids [{}]]'.format(role, access_id, group_id))
+    
+    # Save the configuration
+    AdminConfig.save()
+    print("Configuration saved successfully.")
+
+# Get the group CN and roles from the command-line arguments
+group_cn = sys.argv[0]
+roles = sys.argv[1:]
+
+# Call the function to map the group to the roles with the provided group CN
+map_group_roles(group_cn, roles)

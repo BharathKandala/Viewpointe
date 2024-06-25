@@ -1,0 +1,5 @@
+---
+log_dir: "/vpapp/logs/{{ bank_id }}/CG3-AccesspointeII"
+log_grp: "wasloggp"
+log_files:
+  - was_group_creating.j2
