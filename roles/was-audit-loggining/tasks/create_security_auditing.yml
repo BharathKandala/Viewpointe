@@ -1,0 +1,13 @@
+---
+- name: "Create security Auditing"
+  ansible.builtin.command: >
+    sh wsadmin.sh -lang jython -username {{ was_username }} -password {{ was_password }} -f {{ bin_directory }}/was-security-auditing-creation.py {{ command_line_arg_for_security_auditing }}
+  register: security_audit_reg
+  args:
+    chdir: "{{ bin_directory }}"
+  changed_when: security_audit_reg.rc == 0
+
+- name: Print the result of Create security Auditing
+  ansible.builtin.debug:
+    msg: "{{ security_audit_reg.stdout }}"
+  changed_when: "'Configuration saved successfully.' in security_audit_reg.stdout"

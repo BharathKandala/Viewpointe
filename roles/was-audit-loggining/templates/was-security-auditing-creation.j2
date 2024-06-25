@@ -1,0 +1,36 @@
+# step 11 c modify audit policy
+
+
+# Function to modify audit policy configuration
+def modify_audit_policy(audit_enabled, audit_policy, auditor_id, auditor_pwd, sign, encrypt, verbose):
+    # Define all arguments with their keys
+    audit_policy_args = [
+        '-auditEnabled', audit_enabled,
+        '-auditPolicy', audit_policy,
+        '-auditorId', auditor_id,
+        '-auditorPwd', auditor_pwd,
+        '-sign', sign,
+        '-encrypt', encrypt,
+        '-verbose', verbose
+    ]
+
+    # Apply the changes using AdminTask.modifyAuditPolicy
+    AdminTask.modifyAuditPolicy(audit_policy_args)
+
+    # Save changes
+    AdminConfig.save()
+    print("Configuration saved successfully.")
+
+# Input Variables
+audit_enabled = sys.argv[0]
+audit_policy = sys.argv[1]
+auditor_id = sys.argv[2]
+auditor_pwd = sys.argv[3]
+sign = sys.argv[4] if sys.argv[4] != "EMPTY" else "false"
+encrypt = sys.argv[5] if sys.argv[5] != "EMPTY" else "false"
+verbose = sys.argv[6] if sys.argv[6] != "EMPTY" else "true"
+
+# Call function to modify audit policy configuration
+modify_audit_policy(audit_enabled, audit_policy, auditor_id, auditor_pwd, sign, encrypt, verbose)
+
+#sh wsadmin.sh -f modify_audit.py true NOWARN "usb-cg3-qa-wasadmin2" "Welcome2ibm"

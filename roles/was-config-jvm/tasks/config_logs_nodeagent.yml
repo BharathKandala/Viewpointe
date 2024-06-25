@@ -1,0 +1,65 @@
+---
+- name: "Configure JVM arguments for NodeAgent"
+  ansible.builtin.command: >
+    sh wsadmin.sh -lang jython -username {{ was_username }} -password {{ was_password }} -f {{ bin_directory }}/was_config_dmgr_jvm.py {{ nodeagent_jvm_command_line_arguments }}
+  register: config_jvm_output_reg_na
+  args:
+    chdir: "{{ bin_directory }}"
+  changed_when: config_jvm_output_reg_na.rc == 0
+
+- name: Print the result of JVM Configuration
+  ansible.builtin.debug:
+    msg: "{{ config_jvm_output_reg_na }}"
+  changed_when: "'JVM Configuration updated successfully' in config_jvm_output_reg_na.stdout"
+
+- name: "Configure JVM Logs in Logging and Traces for NodeAgent"
+  ansible.builtin.command: >
+    sh wsadmin.sh -lang jython -username {{ was_username }} -password {{ was_password }} -f {{ bin_directory }}/was_config_jvm_logs.py {{ nodeagent_jvm_log_command_line_arguments }}
+  register: config_jvm_logs_output_reg_na
+  args:
+    chdir: "{{ bin_directory }}"
+  changed_when: config_jvm_logs_output_reg_na.rc == 0
+
+- name: Print the result of JVM Logs
+  ansible.builtin.debug:
+    msg: "{{ config_jvm_logs_output_reg_na }}"
+  changed_when: "config_jvm_logs_output_reg_na.rc == 0"
+
+- name: "Configure Traces Logging for NodeAgent"
+  ansible.builtin.command: >
+    sh wsadmin.sh -lang jython -username {{ was_username }} -password {{ was_password }} -f {{ bin_directory }}/was_config_trace_logs.py {{ nodeagent_trace_log_command_line_arguments }}
+  register: config_trace_output_reg_na
+  args:
+    chdir: "{{ bin_directory }}"
+  changed_when: config_trace_output_reg_na.rc == 0
+
+- name: Print the result of Trace Logs
+  ansible.builtin.debug:
+    msg: "{{ config_trace_output_reg_na }}"
+  changed_when: "config_trace_output_reg_na.rc == 0"
+
+- name: "Configure IBM Service Logs for NodeAgent"
+  ansible.builtin.command: >
+    sh wsadmin.sh -lang jython -username {{ was_username }} -password {{ was_password }} -f {{ bin_directory }}/was_config_ibm_service_logs.py {{ nodeagent_service_log_command_line_arguments }}
+  register: config_ibmservicelog_output_reg_na
+  args:
+    chdir: "{{ bin_directory }}"
+  changed_when: config_ibmservicelog_output_reg_na.rc == 0
+
+- name: Print the result of IBM Service logs
+  ansible.builtin.debug:
+    msg: "{{ config_ibmservicelog_output_reg_na }}"
+  changed_when: "config_ibmservicelog_output_reg_na.rc == 0"
+
+- name: "Configure Process Execution UMASK for NodeAgent"
+  ansible.builtin.command: >
+    sh wsadmin.sh -lang jython -username {{ was_username }} -password {{ was_password }} -f {{ bin_directory }}/was_config_umask.py {{ nodeagent_umask_command_line_arguments }}
+  register: config_umask_output_reg_na
+  args:
+    chdir: "{{ bin_directory }}"
+  changed_when: config_umask_output_reg_na.rc == 0
+
+- name: Print the result of Process Execution Logs
+  ansible.builtin.debug:
+    msg: "{{ config_umask_output_reg_na }}"
+  changed_when: "config_umask_output_reg_na.rc == 0"

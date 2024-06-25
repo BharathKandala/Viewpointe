@@ -1,0 +1,41 @@
+# Function to check if the audit filter already exists
+def audit_filter_exists(name):
+    auditSpecifications = AdminConfig.list('AuditSpecification').splitlines()
+    for specification in auditSpecifications:
+        uniqueName = AdminConfig.showAttribute(specification, 'name')
+        if uniqueName == name:
+            specificationID = specification.split('|')[-1].split('#')[-1].rstrip(')')
+            print("Found AuditSpecification ID: " + specificationID)
+            return True
+    return False
+
+# Function to create audit filter configuration
+def create_audit_filter(name, event_type, outcome):
+    if audit_filter_exists(name):
+        print("Audit filter with the name '" + name + "' already exists. Skipping creation.")
+        return
+
+    # Define all arguments with their keys
+    audit_filter_args = [
+        '-name', name,
+        '-eventType', event_type,
+        '-outcome', outcome
+    ]
+
+    # Apply the changes using AdminTask.createAuditFilter
+    AdminTask.createAuditFilter(audit_filter_args)
+
+    # Save changes
+    AdminConfig.save()
+    print("Configuration saved successfully.")
+
+# Input Variables
+name = sys.argv[0]
+event_type = sys.argv[1]
+outcome = sys.argv[2]
+
+# Call function to create audit filter configuration
+create_audit_filter(name, event_type, outcome)
+
+# Usage:
+# sh wsadmin.sh -f create_audit_filter.py "Viewpointe_Required_Events" "SECURITY_AUTHN,SECURITY_MGMT_AUDIT,SECURITY_AUTHN_CREDS_MODIFY" "SUCCESS,FAILURE,REDIRECT,ERROR,DENIED,WARNING,INFO"

@@ -1,0 +1,56 @@
+import sys
+
+def create_audit_notification(notification_name, log_to_system_out, send_email, email_list, email_format):
+    # Create the audit notification with the specified parameters
+    AdminTask.createAuditNotification('[-notificationName {} -logToSystemOut {} -sendEmail {} -emailList {} -emailFormat {}]'.format(
+        notification_name, log_to_system_out, send_email, email_list, email_format))
+    
+    # Save the configuration
+    AdminConfig.save()
+    print("Configuration saved successfully.")
+
+def get_notification_id(notification_name):
+    # List all WSNotifications
+    wsnotifications = AdminConfig.list('WSNotification').splitlines()
+    
+    # Iterate through each notification to find the one matching the given notification name
+    for notification in wsnotifications:
+        if notification_name in notification:
+            # Extract and return the ID from the notification string
+            return notification.split('#')[-1].rstrip(')')
+    return None
+
+def create_audit_notification_monitor(notification_name, notification_ref, enable):
+    # Create the audit notification monitor with the specified parameters
+    AdminTask.createAuditNotificationMonitor('[-monitorName {} -notificationRef {} -enable {}]'.format(
+        notification_name, notification_ref, str(enable).lower()))
+    
+    # Save the configuration
+    AdminConfig.save()
+    print("Configuration saved successfully.")
+
+# Get the parameters from the command-line arguments
+notification_name = sys.argv[0] #"AuditNotificationMonitor2"
+email_list =  sys.argv[1] # "vpops@viewpointe.com(smtp-server.viewpointe.com)"
+log_to_system_out = "true"
+send_email = "true"
+email_format = "HTML"
+
+enable_monitor = "true" #sys.argv[5].lower() == 'true'
+
+# Call the function to create the audit notification with the provided parameters
+create_audit_notification(notification_name, log_to_system_out, send_email, email_list, email_format)
+
+# Get the ID of the newly created notification
+notification_id = get_notification_id(notification_name)
+
+if notification_id:
+    # Call the function to create the audit notification monitor with the provided notification ID
+    create_audit_notification_monitor(notification_name, notification_id, enable_monitor)
+    
+    # Print the notification ID
+    print(notification_id)
+else:
+    print('Notification ID not found for', notification_name)
+
+

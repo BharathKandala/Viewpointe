@@ -1,0 +1,43 @@
+# Importing necessary packages
+import sys
+
+# Function to create or modify a shared library configuration in IBM WebSphere
+def create_or_modify_shared_library(cell_name, node_name, server_name, library_name, class_path, native_path, isolated_class_loader, description):
+    # Get the server ID
+    server_id = AdminConfig.getid('/Cell:%s/Node:%s/Server:%s/' % (cell_name, node_name, server_name))
+
+    # Define all arguments with their keys
+    library_args = [
+        ('nativePath', native_path),
+        ('name', library_name),
+        ('isolatedClassLoader', isolated_class_loader),
+        ('description', description),
+        ('classPath', class_path)
+    ]
+
+    # Filter out arguments with empty values
+    library_args = [[key, str(value)] for key, value in library_args if value]
+
+    print(library_args)
+
+    # Create the Library configuration
+    AdminConfig.create('Library', server_id, library_args)
+
+    # Save changes
+    AdminConfig.save()
+    print("Shared library configuration created successfully.")
+
+# Input Variables
+cell_name = sys.argv[0]
+node_name = sys.argv[1]
+server_name = sys.argv[2]
+library_name = sys.argv[3]
+class_path = sys.argv[4]
+native_path = sys.argv[5] if len(sys.argv) > 5 and sys.argv[5] != "EMPTY" else ""
+isolated_class_loader = sys.argv[6].lower() == 'true' if len(sys.argv) > 6 else False
+description = sys.argv[7] if len(sys.argv) > 7 and sys.argv[7] != "EMPTY" else ""
+
+# Call function to create or modify shared library configuration
+create_or_modify_shared_library(cell_name, node_name, server_name, library_name, class_path, native_path, isolated_class_loader, description)
+
+# sh wsadmin.sh -lang jython -f shared_library.py sc-q-autwas03DmgrCell sc-q-autwas03Node ST1-APIIII-sc-q-autwas03 ST1-APII-SharedLibrary  /vpapp/ST1/CG3-AccesspointeII/config EMPTY EMPTY false

@@ -1,0 +1,57 @@
+# Importing necessary packages
+import sys
+import os
+
+# Function to modify log files configuration JVM Logs
+def modify_log_files(node_name, server_name, output_log_filename, error_log_filename, rollover_size_output, max_backup_files_output, rollover_size_error, max_backup_files_error):
+    # Get the server ID
+    server_id = AdminConfig.getid('/Node:%s/Server:%s/' % (node_name, server_name))
+
+    # Get the JVM configuration ID
+    output_stream_redirect_log = AdminConfig.showAttribute(server_id, 'outputStreamRedirect')
+    error_stream_redirect_log = AdminConfig.showAttribute(server_id, 'errorStreamRedirect')
+
+    # Define all arguments with their keys for output stream redirect log
+    output_log_args = [
+        ('rolloverSize', rollover_size_output),
+        ('maxNumberOfBackupFiles', max_backup_files_output),
+        ('fileName', output_log_filename)
+    ]
+
+    # Define all arguments with their keys for error stream redirect log
+    error_log_args = [
+        ('rolloverSize', rollover_size_error),
+        ('maxNumberOfBackupFiles', max_backup_files_error),
+        ('fileName', error_log_filename)
+    ]
+
+    # Filter out arguments with empty values for both logs
+    output_log_args = [[key, value] for key, value in output_log_args if value]
+    error_log_args = [[key, value] for key, value in error_log_args if value]
+
+    print(output_log_args)
+    print(error_log_args)
+
+    # Apply the changes if there are any arguments left for both logs
+    if output_log_args:
+        AdminConfig.modify(output_stream_redirect_log, output_log_args)
+    
+    if error_log_args:
+        AdminConfig.modify(error_stream_redirect_log, error_log_args)
+
+    # Save changes
+    AdminConfig.save()
+    print("JVM Log files configuration updated successfully.")
+
+# Input Variables
+node_name = sys.argv[0]
+server_name = sys.argv[1]
+rollover_size_output = sys.argv[2] 
+max_backup_files_output = sys.argv[3] 
+rollover_size_error = sys.argv[4] 
+max_backup_files_error = sys.argv[5] 
+output_log_filename = sys.argv[6] if sys.argv[6] != "EMPTY" else ""
+error_log_filename = sys.argv[7] if sys.argv[7] != "EMPTY" else ""
+
+# Call function to modify log files configuration
+modify_log_files(node_name, server_name, output_log_filename, error_log_filename, rollover_size_output, max_backup_files_output, rollover_size_error, max_backup_files_error)

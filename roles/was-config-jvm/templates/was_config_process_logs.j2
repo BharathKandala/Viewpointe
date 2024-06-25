@@ -1,0 +1,38 @@
+# Importing necessary packages
+import sys
+import os
+
+# Function to modify process definition
+def modify_process_def(node_name, server_name, stderr_filename, stdout_filename):
+    # Get the server ID
+    server_id = AdminConfig.getid('/Node:%s/Server:%s/' % (node_name, server_name))
+
+    # Get the ProcessDef configuration ID
+    process_def = AdminConfig.list('ProcessDef', server_id)
+
+    # Define all arguments with their keys
+    stderr = ['stderrFilename', stderr_filename]
+    stdout = ['stdoutFilename', stdout_filename]
+    attrs = [stderr, stdout]
+
+    # Filter out arguments with empty values
+    attrs = [[key, value] for key, value in attrs if value]
+
+    print(attrs)
+
+    # Apply the changes if there are any arguments left
+    if attrs:
+        AdminConfig.modify(process_def, [['ioRedirect', attrs]])
+
+    # Save changes
+    AdminConfig.save()
+    print("Process Logs configuration updated successfully.")
+
+# Input Variables
+node_name = sys.argv[0]
+server_name = sys.argv[1]
+stderr_filename = sys.argv[2] if sys.argv[2] != "EMPTY" else ""
+stdout_filename = sys.argv[3] if sys.argv[3] != "EMPTY" else ""
+
+# Call function to modify process definition
+modify_process_def(node_name, server_name, stderr_filename, stdout_filename)

@@ -1,0 +1,117 @@
+---
+- name: "Configure JVM arguments for Application Server"
+  ansible.builtin.command: >
+    sh wsadmin.sh -lang jython -username {{ was_username }} -password {{ was_password }} -f {{ bin_directory }}/was_config_dmgr_jvm.py {{ appserver_jvm_command_line_arguments }}
+  register: config_jvm_output_reg_as
+  args:
+    chdir: "{{ bin_directory }}"
+  changed_when: config_jvm_output_reg_as.rc == 0
+
+- name: Print the result of JVM Configuration
+  ansible.builtin.debug:
+    msg: "{{ config_jvm_output_reg_as }}"
+  changed_when: "'JVM Configuration updated successfully' in config_jvm_output_reg_as.stdout"
+
+- name: "Configure JVM Logs in Logging and Traces for Application Server"
+  ansible.builtin.command: >
+    sh wsadmin.sh -lang jython -username {{ was_username }} -password {{ was_password }} -f {{ bin_directory }}/was_config_jvm_logs.py {{ appserver_jvm_log_command_line_arguments }}
+  register: config_jvm_logs_output_reg_as
+  args:
+    chdir: "{{ bin_directory }}"
+  changed_when: config_jvm_logs_output_reg_as.rc == 0
+
+- name: Print the result of JVM Logs
+  ansible.builtin.debug:
+    msg: "{{ config_jvm_logs_output_reg_as }}"
+  changed_when: "config_jvm_logs_output_reg_as.rc == 0"
+
+- name: "Configure Traces Logging for Application Server"
+  ansible.builtin.command: >
+    sh wsadmin.sh -lang jython -username {{ was_username }} -password {{ was_password }} -f {{ bin_directory }}/was_config_trace_logs.py {{ appserver_trace_log_command_line_arguments }}
+  register: config_trace_output_reg_as
+  args:
+    chdir: "{{ bin_directory }}"
+  changed_when: config_trace_output_reg_as.rc == 0
+
+- name: Print the result of Trace Logs
+  ansible.builtin.debug:
+    msg: "{{ config_trace_output_reg_as }}"
+  changed_when: "config_trace_output_reg_as.rc == 0"
+
+- name: "Configure IBM Service Logs for Application Server"
+  ansible.builtin.command: >
+    sh wsadmin.sh -lang jython -username {{ was_username }} -password {{ was_password }} -f {{ bin_directory }}/was_config_ibm_service_logs.py {{ appserver_service_log_command_line_arguments }}
+  register: config_ibmservicelog_output_reg_as
+  args:
+    chdir: "{{ bin_directory }}"
+  changed_when: config_ibmservicelog_output_reg_as.rc == 0
+
+- name: Print the result of IBM Service logs
+  ansible.builtin.debug:
+    msg: "{{ config_ibmservicelog_output_reg_as }}"
+  changed_when: "config_ibmservicelog_output_reg_as.rc == 0"
+
+- name: "Configure Process Execution UMASK for Application Server"
+  ansible.builtin.command: >
+    sh wsadmin.sh -lang jython -username {{ was_username }} -password {{ was_password }} -f {{ bin_directory }}/was_config_umask.py {{ appserver_umask_command_line_arguments }}
+  register: config_umask_output_reg_as
+  args:
+    chdir: "{{ bin_directory }}"
+  changed_when: config_umask_output_reg_as.rc == 0
+
+- name: Print the result of Process Execution Logs
+  ansible.builtin.debug:
+    msg: "{{ config_umask_output_reg_as }}"
+  changed_when: "config_umask_output_reg_as.rc == 0"
+
+- name: "Configure Webcontainer transport chains for Application Server"
+  ansible.builtin.command: >
+    sh wsadmin.sh -lang jython -username {{ was_username }} -password {{ was_password }} -f {{ bin_directory }}/was_config_webcontainer_transport_chains_enabling.py {{ appserver_wtc_command_line_arguments }}
+  register: config_wtc_output_reg_as
+  args:
+    chdir: "{{ bin_directory }}"
+  changed_when: config_wtc_output_reg_as.rc == 0
+
+- name: Print the result of Webcontainer transport chains Enabling
+  ansible.builtin.debug:
+    msg: "{{ config_wtc_output_reg_as }}"
+  changed_when: "config_wtc_output_reg_as.rc == 0"
+
+- name: "Configure Custom Properties for Application Server"
+  ansible.builtin.command: >
+    sh wsadmin.sh -lang jython -username {{ was_username }} -password {{ was_password }} -f {{ bin_directory }}/was_config_custom_properties.py {{ appserver_custom_properties_command_line_arguments }}
+  register: config_customproperties_output_reg_as
+  args:
+    chdir: "{{ bin_directory }}"
+  changed_when: config_customproperties_output_reg_as.rc == 0
+
+- name: Print the result of Custom Properties
+  ansible.builtin.debug:
+    msg: "{{ config_customproperties_output_reg_as }}"
+  changed_when: "config_customproperties_output_reg_as.rc == 0"
+
+- name: "Configure Process Logs for Application Server"
+  ansible.builtin.command: >
+    sh wsadmin.sh -lang jython -username {{ was_username }} -password {{ was_password }} -f {{ bin_directory }}/was_config_process_logs.py {{ appserver_process_logs_command_line_arguments }}
+  register: config_processlogs_output_reg_as
+  args:
+    chdir: "{{ bin_directory }}"
+  changed_when: config_processlogs_output_reg_as.rc == 0
+
+- name: Print the result of Custom Properties
+  ansible.builtin.debug:
+    msg: "{{ config_processlogs_output_reg_as }}"
+  changed_when: "config_processlogs_output_reg_as.rc == 0"
+
+- name: "Configure Shared Library for Application Server"
+  ansible.builtin.command: >
+    sh wsadmin.sh -lang jython -username {{ was_username }} -password {{ was_password }} -f {{ bin_directory }}/was-config_shared_library.py {{ appserver_shared_library_command_line_arguments }}
+  register: config_sharedlibrary_output_reg
+  args:
+    chdir: "{{ bin_directory }}"
+  changed_when: config_sharedlibrary_output_reg.rc == 0
+
+- name: Print the result of Shared Library
+  ansible.builtin.debug:
+    msg: "{{ config_sharedlibrary_output_reg }}"
+  changed_when: "config_sharedlibrary_output_reg.rc == 0"

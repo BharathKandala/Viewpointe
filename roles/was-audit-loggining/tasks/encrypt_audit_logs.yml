@@ -1,0 +1,48 @@
+---
+######## Audit log encryption #############
+- name: Check if /vpapp directory exists
+  ansible.builtin.stat:
+    path: /vpapp
+  register: vpapp_dir
+
+- name: Create WAS-securityaudit directory in /vpapp if it exists
+  when: vpapp_dir.stat.exists
+  ansible.builtin.file:
+    path: /vpapp/WAS-securityaudit
+    state: directory
+    owner: "{{ was_owner }}"
+    group: "{{ was_group }}"
+    mode: '0755'
+
+- name: Create WAS-securityaudit directory in /usr/WebSphere9 if /vpapp does not exist
+  when: not vpapp_dir.stat.exists
+  ansible.builtin.file:
+    path: /usr/WebSphere9/WAS-securityaudit
+    state: directory
+    owner: "{{ was_owner }}"
+    group: "{{ was_group }}"
+    mode: '0755'
+
+- name: Copy the wildcard.p12 certificate to the appropriate directory
+  ansible.builtin.copy:
+    src: "{{ certificate_path }}/{{ certificate_filename }}"
+    dest: "{{ '/vpapp/WAS-securityaudit/' if vpapp_dir.stat.exists else '/usr/WebSphere9/WAS-securityaudit/' }}{{ certificate_filename }}"
+    owner: "{{ was_owner }}"
+    group: "{{ was_group }}"
+    mode: '0644'
+    remote_src: true
+
+#############
+
+- name: "Create keystore,certificate,self signed certificate and enabling in the audit record encryption"
+  ansible.builtin.command: >
+    sh wsadmin.sh -lang jython -username {{ was_username }} -password {{ was_password }} -f {{ bin_directory }}/was-audit-record-encrypt.py {{ command_line_arg_for_audit_record_ecrypt }}
+  register: audit_record_encrypt_reg
+  args:
+    chdir: "{{ bin_directory }}"
+  changed_when: audit_record_encrypt_reg.rc == 0
+
+- name: Print the result of Create keystore,certificate,self signed certificate and enabling in the audit record encryption
+  ansible.builtin.debug:
+    msg: "{{ audit_record_encrypt_reg.stdout }}"
+  changed_when: "'Configuration saved successfully.' in audit_record_encrypt_reg.stdout"

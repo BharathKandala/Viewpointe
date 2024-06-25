@@ -1,0 +1,16 @@
+# Function to modify process definition
+def modify_sos(propertyValue):
+ 
+    security = AdminConfig.getid('/Security:/')
+    prop = AdminConfig.getid('/Security:/Property:'+propertyName+'/')
+    AdminConfig.modify(prop, [['value', propertyValue]])
+
+    AdminConfig.save()
+    print("Single Sign On configuration updated successfully.")
+  
+# Input Variables  
+propertyName = 'com.ibm.ws.security.addHttpOnlyAttributeToCookies'
+propertyValue = sys.argv[0]
+
+# Call function to modify Security definition
+modify_sos(propertyValue)

@@ -1,0 +1,13 @@
+---
+- name: "Config service provider"
+  ansible.builtin.command: >
+    sh wsadmin.sh -lang jython -username {{ was_username }} -password {{ was_password }} -f {{ bin_directory }}/was-audit-service-provider-config.py {{ command_line_arg_for_audit_service_provider }}
+  register: audit_svc_provd_reg
+  args:
+    chdir: "{{ bin_directory }}"
+  changed_when: audit_svc_provd_reg.rc == 0
+
+- name: Print the result of Config service provider
+  ansible.builtin.debug:
+    msg: "{{ audit_svc_provd_reg.stdout }}"
+  changed_when: "'Configuration saved successfully.' in audit_svc_provd_reg.stdout"

@@ -1,0 +1,50 @@
+# Importing necessary packages
+import sys
+import os
+
+# Function to update JVM heap size
+def update_jvm_heap(server_name, initialHeapSize, maximumHeapSize, genericJvmArguments, debugArguments, classpath, verboseModeGarbageCollection):
+    # Get server ID
+    server_id = AdminConfig.getid('/Server:' + server_name + '/')
+    # Get JVM
+    jvm = AdminConfig.list('JavaVirtualMachine', server_id)
+    
+    # Define all arguments with their keys
+    jvm_args = [
+        ('initialHeapSize', initialHeapSize),
+        ('maximumHeapSize', maximumHeapSize),
+        ('genericJvmArguments', genericJvmArguments),
+        ('debugArgs', debugArguments),
+        ('debugMode', 'false'),
+        ('verboseModeGarbageCollection', verboseModeGarbageCollection),
+		('classpath', classpath)
+    ]
+    
+    # Filter out arguments with empty values
+    jvm_args = [[key, value] for key, value in jvm_args if value]
+    
+    print(jvm_args)
+
+    # Apply the changes if there are any arguments left
+    if jvm_args:
+        AdminConfig.modify(jvm, jvm_args)
+    
+    
+    # Save changes
+    AdminConfig.save()
+    print("JVM Configuration updated successfully.")
+
+# Example usage
+server_name = sys.argv[0] 
+genericJvmArguments = sys.argv[1] 
+verboseModeGarbageCollection = sys.argv[2] 
+debugArguments = sys.argv[3] if sys.argv[3] != "EMPTY" else ""
+classpath = sys.argv[4] if sys.argv[4] != "EMPTY" else ""
+initialHeapSize = sys.argv[5] if sys.argv[5] != "EMPTY" else ""
+maximumHeapSize = sys.argv[6] if sys.argv[6] != "EMPTY" else ""
+
+
+
+
+# Call function to update JVM heap size
+update_jvm_heap(server_name, initialHeapSize, maximumHeapSize, genericJvmArguments, debugArguments, classpath, verboseModeGarbageCollection)

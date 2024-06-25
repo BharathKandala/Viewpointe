@@ -1,0 +1,6 @@
+dmgr = AdminConfig.getid("/Server:dmgr/")
+webcontainer = AdminConfig.list("WebContainer", dmgr)
+dmgr_properties=AdminConfig.create("Property", webcontainer, [["name", "com.ibm.ws.webcontainer.addStrict TransportSecurityHeader"],["value", "max-age=31536000; includeSubDomains"]])
+AdminConfig.show(webcontainer)
+print(dmgr_properties)
+AdminConfig.save()

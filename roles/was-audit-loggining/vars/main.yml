@@ -1,0 +1,10 @@
+# ---
+# log_dir: "/vpapp/logs/{{ bank_id }}/CG3-AccesspointeII"
+# log_grp: "wasloggp"
+# log_files:
+#   - was-auditmonitor-creation.j2
+#   - was-security-auditing-creation.j2
+#   - was-audit-filter-type-creation.j2
+#   - was-audit-service-provider-config.j2
+#   - was-audit-record-encrypt.j2
+#   - was-auidt-signing-config.j2

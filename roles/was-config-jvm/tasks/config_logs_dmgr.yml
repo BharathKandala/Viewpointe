@@ -1,0 +1,145 @@
+---
+- name: "Configure JVM arguments DMGR"
+  ansible.builtin.command: >
+    sh wsadmin.sh -lang jython -username {{ was_username }} -password {{ was_password }} -f {{ bin_directory }}/was_config_dmgr_jvm.py {{ dmgr_jvm_command_line_arguments }}
+  register: config_jvm_output_reg_dmgr
+  args:
+    chdir: "{{ bin_directory }}"
+  changed_when: config_jvm_output_reg_dmgr.rc == 0
+
+- name: Print the result of JVM Configuration
+  ansible.builtin.debug:
+    msg: "{{ config_jvm_output_reg_dmgr }}"
+  changed_when: "'JVM Configuration updated successfully' in config_jvm_output_reg_dmgr.stdout"
+
+- name: "Configure JVM Logs in Logging and Traces for DMGR"
+  ansible.builtin.command: >
+    sh wsadmin.sh -lang jython -username {{ was_username }} -password {{ was_password }} -f {{ bin_directory }}/was_config_jvm_logs.py {{ dmgr_jvm_log_command_line_arguments }}
+  register: config_jvm_logs_output_reg_dmgr
+  args:
+    chdir: "{{ bin_directory }}"
+  changed_when: config_jvm_logs_output_reg_dmgr.rc == 0
+
+- name: Print the result of JVM Logs
+  ansible.builtin.debug:
+    msg: "{{ config_jvm_logs_output_reg_dmgr }}"
+  changed_when: "config_jvm_logs_output_reg_dmgr.rc == 0"
+
+- name: "Configure Traces Logging for DMGR"
+  ansible.builtin.command: >
+    sh wsadmin.sh -lang jython -username {{ was_username }} -password {{ was_password }} -f {{ bin_directory }}/was_config_trace_logs.py {{ dmgr_trace_log_command_line_arguments }}
+  register: config_trace_output_reg_dmgr
+  args:
+    chdir: "{{ bin_directory }}"
+  changed_when: config_trace_output_reg_dmgr.rc == 0
+
+- name: Print the result of Trace Logs
+  ansible.builtin.debug:
+    msg: "{{ config_trace_output_reg_dmgr }}"
+  changed_when: "config_trace_output_reg_dmgr.rc == 0"
+
+- name: "Configure IBM Service Logs for DMGR"
+  ansible.builtin.command: >
+    sh wsadmin.sh -lang jython -username {{ was_username }} -password {{ was_password }} -f {{ bin_directory }}/was_config_ibm_service_logs.py {{ dmgr_service_log_command_line_arguments }}
+  register: config_ibmservicelog_output_reg_dmgr
+  args:
+    chdir: "{{ bin_directory }}"
+  changed_when: config_ibmservicelog_output_reg_dmgr.rc == 0
+
+- name: Print the result of IBM Service logs
+  ansible.builtin.debug:
+    msg: "{{ config_ibmservicelog_output_reg_dmgr }}"
+  changed_when: "config_ibmservicelog_output_reg_dmgr.rc == 0"
+
+- name: "Configure Process Execution UMASK for DMGR"
+  ansible.builtin.command: >
+    sh wsadmin.sh -lang jython -username {{ was_username }} -password {{ was_password }} -f {{ bin_directory }}/was_config_umask.py {{ dmgr_umask_command_line_arguments }}
+  register: config_umask_output_reg_dmgr
+  args:
+    chdir: "{{ bin_directory }}"
+  changed_when: config_umask_output_reg_dmgr.rc == 0
+
+- name: Print the result of Process Execution Logs
+  ansible.builtin.debug:
+    msg: "{{ config_umask_output_reg_dmgr }}"
+  changed_when: "config_umask_output_reg_dmgr.rc == 0"
+
+- name: "Configure Webcontainer transport chains for DMGR"
+  ansible.builtin.command: >
+    sh wsadmin.sh -lang jython -username {{ was_username }} -password {{ was_password }} -f {{ bin_directory }}/was_config_webcontainer_transport_chains_enabling.py {{ dmgr_wtc_command_line_arguments }}
+  register: config_wtc_output_reg_dmgr
+  args:
+    chdir: "{{ bin_directory }}"
+  changed_when: config_wtc_output_reg_dmgr.rc == 0
+
+- name: Print the result of Webcontainer transport chains Enabling
+  ansible.builtin.debug:
+    msg: "{{ config_wtc_output_reg_dmgr }}"
+  changed_when: "config_wtc_output_reg_dmgr.rc == 0"
+
+- name: "Configure Extended Repository Service for DMGR"
+  ansible.builtin.command: >
+    sh wsadmin.sh -lang jython -username {{ was_username }} -password {{ was_password }} -f {{ bin_directory }}/was_config_depth.py {{ dmgr_extended_repository_service_command_line_arguments }}
+  register: config_depth_output_reg_dmgr
+  args:
+    chdir: "{{ bin_directory }}"
+  changed_when: config_depth_output_reg_dmgr.rc == 0
+
+- name: Print the result of Extended Repository Service
+  ansible.builtin.debug:
+    msg: "{{ config_depth_output_reg_dmgr }}"
+  changed_when: "config_depth_output_reg_dmgr.rc == 0"
+
+- name: "Configure Single Sign On"
+  ansible.builtin.command: >
+    sh wsadmin.sh -lang jython -username {{ was_username }} -password {{ was_password }} -f {{ bin_directory }}/was_config_sso.py {{ dmgr_sso_command_line_arguments }}
+  register: config_sso_output_reg_dmgr
+  args:
+    chdir: "{{ bin_directory }}"
+  changed_when: config_sso_output_reg_dmgr.rc == 0
+
+- name: Print the result of SSO
+  ansible.builtin.debug:
+    msg: "{{ config_sso_output_reg_dmgr }}"
+  changed_when: "config_sso_output_reg_dmgr.rc == 0"
+
+- name: "Get stats of a directory {{ scripts_dir }}"
+  ansible.builtin.stat:
+    path: "{{ scripts_dir }}"
+  register: sts_dir_stat
+
+- name: "Create a directory if it does not exist {{ scripts_dir }}"
+  ansible.builtin.file:
+    path: "{{ scripts_dir }}"
+    state: directory
+    owner: "{{ was_owner }}"
+    group: "{{ was_group }}"
+    mode: '0755'
+  when: not sts_dir_stat.stat.exists
+
+- name: "Check stats of a directory {{ scripts_dir }}"
+  ansible.builtin.stat:
+    path: "{{ scripts_dir }}"
+  register: sts_dir
+
+- name: "Generate Response file setSTS"
+  ansible.builtin.template:
+    src: "{{ sts_file }}"
+    dest: "{{ scripts_dir }}/{{ sts_file | replace('.j2', '.py') }}"
+    owner: "{{ was_owner }}"
+    group: "{{ was_group }}"
+    mode: '0755'
+  when: sts_dir.stat.exists
+
+- name: "Configure setSTS-dmgr file"
+  ansible.builtin.command: >
+    sh wsadmin.sh -lang jython -username {{ was_username }} -password {{ was_password }} -f {{ scripts_dir }}/{{ sts_file | replace('.j2', '.py') }}
+  register: config_setSTS
+  args:
+    chdir: "{{ bin_directory }}"
+  changed_when: config_setSTS.rc == 0
+
+- name: Print the result of setSTS
+  ansible.builtin.debug:
+    msg: "{{ config_setSTS }}"
+  changed_when: "config_setSTS.rc == 0"

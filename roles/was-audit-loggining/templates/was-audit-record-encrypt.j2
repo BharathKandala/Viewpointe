@@ -1,0 +1,108 @@
+# Function to create an audit key store
+
+def get_key_store_id(key_store_name):
+    key_store_ids = AdminConfig.list('KeyStore').splitlines()
+    for key_store_id in key_store_ids:
+        unique_name = AdminConfig.showAttribute(key_store_id, 'name')
+        if unique_name == key_store_name:
+            specification_id = key_store_id.split('|')[-1].split('#')[-1].rstrip(')')
+            print("Found KeyStore ID: " + specification_id)
+            return specification_id
+    print("KeyStore with the unique name '" + key_store_name + "' not found.")
+    return None
+
+def create_audit_key_store(key_store_name, key_store_location, key_store_password, key_store_type="PKCS12"):
+    AdminTask.createAuditKeyStore([
+        '-keyStoreName', key_store_name,
+        '-keyStoreLocation', key_store_location,
+        '-keyStorePassword', key_store_password,
+        '-keyStorePasswordVerify', key_store_password,
+        '-keyStoreType', key_store_type
+    ])
+    print("Audit Key Store created successfully.")
+
+# Function to create a self-signed certificate
+def create_audit_self_signed_certificate(key_store_name, key_store_scope, certificate_alias, certificate_size, common_name, organization, organizational_unit, locality, state, country, valid_days):
+    AdminTask.createAuditSelfSignedCertificate([
+        '-keyStoreName', key_store_name,
+        '-keyStoreScope', key_store_scope,
+        '-certificateAlias', certificate_alias,
+        '-certificateVersion', '',
+        '-certificateSize', certificate_size,
+        '-certificateCommonName', common_name,
+        '-certificateOrganization', organization,
+        '-certificateOrganizationalUnit', organizational_unit,
+        '-certificateLocality', locality,
+        '-certificateState', state,
+        '-certificateZip', '',
+        '-certificateCountry', country,
+        '-certificateValidDays', valid_days
+    ])
+    print("Self-Signed Certificate created successfully.")
+
+# Function to create an audit encryption configuration
+def create_audit_encryption_config(enable_audit_encryption, encryption_key_store_ref, cert_alias, autogen_cert, import_cert):
+    AdminTask.createAuditEncryptionConfig([
+        '-enableAuditEncryption', enable_audit_encryption,
+        '-encryptionKeyStoreRef', encryption_key_store_ref,
+        '-certAlias', cert_alias,
+        '-autogenCert', autogen_cert,
+        '-importCert', import_cert
+    ])
+    print("Audit Encryption Configuration created successfully.")
+
+# Function to save configuration
+def save_config():
+    AdminConfig.save()
+    print("Configuration saved successfully.")
+
+# Input Variables
+key_store_name = sys.argv[0]
+key_store_location = sys.argv[1]
+key_store_password = sys.argv[2]
+key_store_type = "PKCS12"
+
+key_store_scope = sys.argv[3]
+certificate_alias = sys.argv[4]
+certificate_size = sys.argv[5]
+common_name = sys.argv[6]
+organization = sys.argv[7]
+organizational_unit = sys.argv[8]
+locality = sys.argv[9]
+state = sys.argv[10]
+country = sys.argv[11]
+valid_days = sys.argv[12]
+
+enable_audit_encryption = sys.argv[13]
+# encryption_key_store_ref = sys.argv[14]
+cert_alias = sys.argv[14]
+autogen_cert = sys.argv[15]
+import_cert = sys.argv[16]
+
+# Call functions to perform tasks
+create_audit_key_store(key_store_name, key_store_location, key_store_password, key_store_type)
+create_audit_self_signed_certificate(key_store_name, key_store_scope, certificate_alias, certificate_size, common_name, organization, organizational_unit, locality, state, country, valid_days)
+
+
+# Save the configuration
+save_config()
+
+
+AdminTask.deleteAuditCertificate(['-keyStoreName', key_store_name, '-keyStoreScope', key_store_scope, '-certificateAlias', 1 ])
+
+# Save the configuration
+save_config()
+
+
+encryption_key_store_ref = get_key_store_id(key_store_name)
+if encryption_key_store_ref:
+    create_audit_encryption_config(enable_audit_encryption, encryption_key_store_ref, cert_alias, autogen_cert, import_cert)
+else:
+    print("Skipping audit encryption configuration since KeyStore ID was not found.")
+
+save_config()
+
+# Usage:
+# sh wsadmin.sh -f audit_config.py "wildcard-cert" "/vpapp/WAS-securityaudit/wildcardWithChain-newpassword.p12" "CxlmKy5qKWw" "(cell):sc-q-autwas02DmgrCell" "wildcard-cert" "2048" "*.vptoarchive.org" "Viewpointe_Archive_service_LLC" "Service_Delivery" "Charlotte" "North_Carolina" "US" "365" "true" "KeyStore_1718279104082" "wildcard-cert" "false" "false"
+
+#  sh wsadmin.sh -lang jython -username usb-cg3-qa-wasadmin2 -password Welcome2ibm -f file1.py "wildcard-cert" "/vpapp/WAS-securityaudit/wildcardWithChain-newpassword.p12" "CxlmKy5qKWw" "(cell):sc-q-autwas02DmgrCell" "wildcard-cert" "2048" "*.vptoarchive.org" "Viewpointe_Archive_service_LLC" "Service_Delivery" "Charlotte" "North_Carolina" "US" "365"

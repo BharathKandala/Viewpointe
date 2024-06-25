@@ -1,0 +1,21 @@
+def create_audit_signing_config(signingKeyStoreRef, enableAuditSigning, signingCertAlias):
+    config_string = '-signingKeyStoreRef {} -enableAuditSigning {} -certAlias {} -autogenCert false -importCert false -useEncryptionCert false'.format(signingKeyStoreRef, enableAuditSigning, signingCertAlias)
+    AdminTask.createAuditSigningConfig(config_string)
+
+# Function to save the configuration
+def save_config():
+    AdminConfig.save()
+    print("Configuration saved successfully.")
+
+if __name__ == "__main__":
+    import sys
+    
+    signingKeyStoreRef = sys.argv[0] #"KeyStore_1"
+    enableAuditSigning = sys.argv[1] #"true"
+    signingCertAlias = sys.argv[2] #"wildcard-cert"
+
+    create_audit_signing_config(signingKeyStoreRef, enableAuditSigning, signingCertAlias)
+    save_config()
+
+# Example command to run the script:
+# sh wsadmin.sh -lang jython -username usb-cg3-qa-wasadmin2 -password Welcome2ibm -f file1.py "KeyStore_1" "true" "default" #"wildcard-cert"

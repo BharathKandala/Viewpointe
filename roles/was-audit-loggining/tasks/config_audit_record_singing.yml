@@ -1,0 +1,13 @@
+---
+- name: "Config Audit record signing"
+  ansible.builtin.command: >
+    sh wsadmin.sh -lang jython -username {{ was_username }} -password {{ was_password }} -f {{ bin_directory }}/was-auidt-signing-config.py {{ command_line_arg_for_audit_record_signing }}
+  register: audit_record_sign_reg
+  args:
+    chdir: "{{ bin_directory }}"
+  changed_when: audit_record_sign_reg.rc == 0
+
+- name: Print the result of Config Audit record signing
+  ansible.builtin.debug:
+    msg: "{{ audit_record_sign_reg.stdout }}"
+  changed_when: "'Configuration saved successfully.' in audit_record_sign_reg.stdout"

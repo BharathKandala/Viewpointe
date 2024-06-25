@@ -1,0 +1,82 @@
+# step 11 c modify audit emitter
+
+# Function to get the emitter_ref ID from the audit service provider name
+def get_audit_service_provider_id(provider_name):
+    auditServiceProviders = AdminConfig.list('AuditServiceProvider').splitlines()
+    for provider in auditServiceProviders:
+        uniqueName = AdminConfig.showAttribute(provider, 'name')
+        if uniqueName == provider_name:
+            providerID = provider.split('|')[-1].split('#')[-1].rstrip(')')
+            print("Found AuditServiceProvider ID: " + providerID)
+            return providerID
+    print("AuditServiceProvider with the unique name '" + provider_name + "' not found.")
+    return None
+
+# Function to get the ID of a specific audit specification
+def get_specific_audit_specification_id():
+    auditSpecifications = AdminConfig.list('AuditSpecification').splitlines()
+    specificationID = []
+    for specification in auditSpecifications:
+        uniqueName = AdminConfig.showAttribute(specification, 'name')
+        specificationIDs = specification.split('|')[-1].split('#')[-1].rstrip(')')
+        specificationID.append(specificationIDs)
+        print("AuditSpecification Name: " + uniqueName + ", ID: " + specificationIDs)
+    return ','.join(specificationID)
+
+# Function to check if the audit emitter exists
+def audit_emitter_exists(provider_id):
+    auditEmitters = AdminConfig.list('AuditServiceProvider').splitlines()
+    for emitter in auditEmitters:
+        emitterProviderID = emitter.split('|')[-1].split('#')[-1].rstrip(')')
+        if emitterProviderID == provider_id:
+            print("Found AuditEmitter with ID: " + emitterProviderID)
+            return True
+    return False
+
+# Function to modify audit emitter configuration
+def modify_audit_emitter(provider_name, specification_name, wrap_behavior, file_location, max_logs, max_file_size):
+    provider_id = get_audit_service_provider_id(provider_name)
+    if provider_id is None:
+        print("Skipping modification since the AuditServiceProvider was not found.")
+        return
+
+    if not audit_emitter_exists(provider_id):
+        print("Audit emitter with the ID '" + provider_id + "' not found. Skipping modification.")
+        return
+
+    # Get the specific audit specification ID
+    audit_specification_id = get_specific_audit_specification_id()
+    if audit_specification_id is None:
+        print("Skipping modification since the specific AuditSpecification was not found.")
+        return
+
+    # Define all arguments with their keys
+    audit_emitter_args = [
+        '-emitterRef', provider_id,
+        '-wrapBehavior', wrap_behavior,
+        '-auditFilters', audit_specification_id,
+        '-fileLocation', file_location,
+        '-maxLogs', max_logs,
+        '-maxFileSize', max_file_size
+    ]
+
+    # Apply the changes using AdminTask.modifyAuditEmitter
+    AdminTask.modifyAuditEmitter(audit_emitter_args)
+
+    # Save changes
+    AdminConfig.save()
+    print("Configuration saved successfully.")
+
+# Input Variables
+provider_name = sys.argv[0]
+specification_name = sys.argv[1]
+wrap_behavior = sys.argv[2]
+file_location = "${LOG_ROOT}" #sys.argv[3]
+max_logs = sys.argv[3]
+max_file_size = sys.argv[4]
+
+# Call function to modify audit emitter configuration
+modify_audit_emitter(provider_name, specification_name, wrap_behavior, file_location, max_logs, max_file_size)
+
+# Usage:
+# sh wsadmin.sh -f modify_audit_emitter.py "auditServiceProviderImpl_1" "Viewpointe_Required_Events" "WRAP" "${LOG_ROOT}" "255" "28"

@@ -1,0 +1,32 @@
+---
+dmgr_profile_name: "{{ inventory_hostname }}Dmgr"
+was_base_path: "/usr/WebSphere9/AppServer"
+was_username: "usb-cg3-qa-wasadmin"
+was_password: "Welcome2ibm"
+bin_directory: "{{ was_base_path }}/profiles/{{ inventory_hostname }}/bin"
+was_owner: "usb-cg3-qa-wasadmin"
+was_group: "usb-was-grp"
+was_bin_dir: "{{ was_base_path }}/profiles/{{ appserver_profile_name }}/bin"
+was_ports_dir: "/home/{{ was_username }}/ports_dir"
+portdef_files:
+  - appserver_portdef.j2
+  - dmgr_portdef.j2
+  - nodeagent_portdef.j2
+debug_var: default
+log_dir: "/vpapp/logs/{{ appserver_bank_identifier }}/CG3-AccesspointeII"
+log_grp: "wasloggp"
+log_files:
+  - was_config_custom_properties.j2
+  - was_config_depth.j2
+  - was_config_trace_logs.j2
+  - was_config_umask.j2
+  - was_config_webcontainer_transport_chains_enabling.j2
+  - was_config_dmgr_jvm.j2
+  - was_config_ibm_service_logs.j2
+  - was_config_jvm_logs.j2
+  - was_config_process_logs.j2
+  - was_config_sso.j2
+  - was-config_shared_library.j2
+sts_file: setSTS-for-DMGR.j2
+scripts_dir: "/home/{{ was_username }}/Scripts"
+config: "all"

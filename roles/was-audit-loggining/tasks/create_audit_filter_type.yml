@@ -1,0 +1,13 @@
+---
+- name: "Create Audit filter type"
+  ansible.builtin.command: >
+    sh wsadmin.sh -lang jython -username {{ was_username }} -password {{ was_password }} -f {{ bin_directory }}/was-audit-filter-type-creation.py {{ command_line_arg_for_audit_filter_type }}
+  register: audit_filter_type_reg
+  args:
+    chdir: "{{ bin_directory }}"
+  changed_when: audit_filter_type_reg.rc == 0
+
+- name: Print the result of Create Audit filter type
+  ansible.builtin.debug:
+    msg: "{{ audit_filter_type_reg.stdout }}"
+  changed_when: "'Configuration saved successfully.' in audit_filter_type_reg.stdout"

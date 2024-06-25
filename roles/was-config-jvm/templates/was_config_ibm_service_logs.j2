@@ -1,0 +1,41 @@
+# Importing necessary packages
+import sys
+import os
+
+# Function to modify service log configuration IBM Service Logs
+def modify_service_log(node_name, server_name, log_filename, log_size, log_enabled):
+    # Get the server ID
+    server_id = AdminConfig.getid('/Node:%s/Server:%s/' % (node_name, server_name))
+
+    # Get the ServiceLog configuration ID
+    service_log = AdminConfig.list('ServiceLog', server_id)
+
+    # Define all arguments with their keys
+    service_log_args = [
+        ('name', log_filename),
+        ('size', log_size),
+        ('enabled', log_enabled)
+    ]
+
+    # Filter out arguments with empty values
+    service_log_args = [[key, value] for key, value in service_log_args if value]
+
+    print(service_log_args)
+
+    # Apply the changes if there are any arguments left
+    if service_log_args:
+        AdminConfig.modify(service_log, service_log_args)
+
+    # Save changes
+    AdminConfig.save()
+    print("IBM Service log configuration updated successfully.")
+
+# Input Variables
+node_name = sys.argv[0]
+server_name = sys.argv[1]
+log_size = sys.argv[2] 
+log_filename = sys.argv[3] if sys.argv[3] != "EMPTY" else ""
+log_enabled = sys.argv[4] if sys.argv[4] != "EMPTY" else ""
+
+# Call function to modify service log configuration
+modify_service_log(node_name, server_name, log_size, log_filename, log_enabled)

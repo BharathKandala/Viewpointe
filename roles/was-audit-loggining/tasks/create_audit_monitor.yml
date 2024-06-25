@@ -1,0 +1,13 @@
+---
+- name: "Create Audit monitoring and enable monitoring notification"
+  ansible.builtin.command: >
+    sh wsadmin.sh -lang jython -username {{ was_username }} -password {{ was_password }} -f {{ bin_directory }}/was-auditmonitor-creation.py {{ command_line_arg_for_audit_monitor_notification }}
+  register: audit_monitor_reg
+  args:
+    chdir: "{{ bin_directory }}"
+  changed_when: audit_monitor_reg.rc == 0
+
+- name: Print the result of Create Audit monitoring and enable monitoring notification
+  ansible.builtin.debug:
+    msg: "{{ audit_monitor_reg.stdout }}"
+  changed_when: "'Configuration saved successfully.' in audit_monitor_reg.stdout"
