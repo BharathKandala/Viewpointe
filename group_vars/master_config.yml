@@ -1,0 +1,464 @@
+---
+profile_name: "{{ inventory_hostname }}Dmgr"
+was_base_path: "/usr/WebSphere9/AppServer"
+was_username: "usb-cg3-qa-wasadmin"
+was_password: "Welcome2VPT" # for demo purpose only
+bin_directory: "{{ was_base_path }}/profiles/{{ profile_name }}/bin"
+was_owner: "usb-cg3-qa-wasadmin"
+was_group: "usb-was-grp"
+############
+
+###### LDAP Details ######
+# cr7u9ba0oj9o3f2.vptocsdev.net
+
+ldap_server: owgb8qwmcd9ug9n.vptocsdev.net
+ldap_alias: ldapserver
+ldap_repo: viewpointeLDAP
+ldap_bind_user: vpt-was-dev-bind@vptocsdev.net # vpt-was-bind-testirp@vptarchive.org
+ldap_bind_pass: '#EDC4rfv%TGB' # ONLY FOR DEMO PURPOSE '#EDC4rfv%TGBU'
+ldap_realm: DC=vptocsdev,DC=net
+ldap_ssl: true
+ldap_ssl_port: "636"
+
+
+################
+bank_id: "ST0"
+appserver_bank_identifier: "{{ bank_id }}"
+
+# Profile Details
+appserver_name: "{{ appserver_bank_identifier }}-APII-{{ inventory_hostname }}"
+appserver_node_name: "{{ inventory_hostname }}Node"
+appserver_profile_name: "{{ inventory_hostname }}"
+appserver_response_file: "{{ bin_directory }}/was_create_appserver_profile.py"
+appserver_template_file: "was_create_appserver_profile.rsp.j2"
+appserver_port_file_path: "{{ was_ports_dir }}/appserver_portdef.props"
+
+# App Server JVM Arguments
+appserver_jvm_initial_heap_size: "512"
+appserver_jvm_maximum_heap_size: "1024"
+appserver_jvm_generic_arguments: "-Dcom.sun.jndi.ldap.object.disableEndpointIdentification=true -verbose:gc"
+appserver_jvm_debug_arguments: "-Djava.compiler=NONE -Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=7777"
+appserver_jvm_classpath: "EMPTY"
+appserver_jvm_verbose_gc: "false"
+
+appserver_jvm_command_line_arguments: '{{ appserver_name }} "{{ appserver_jvm_generic_arguments }}" {{ appserver_jvm_verbose_gc }} "{{ appserver_jvm_debug_arguments }}" {{ appserver_jvm_classpath }} {{ appserver_jvm_initial_heap_size }} {{ appserver_jvm_maximum_heap_size }}'
+
+# Arguments JVM Logs
+appserver_log_rollover_size_output: "50"
+appserver_log_max_backup_files_output: "200"
+appserver_log_rollover_size_error: "50"
+appserver_log_max_backup_files_error: "200"
+appserver_log_output_filename: "/vpapp/logs/{{ appserver_bank_identifier }}/CG3-AccesspointeII/SystemOut.log"
+appserver_log_error_filename: "/vpapp/logs/{{ appserver_bank_identifier }}/CG3-AccesspointeII/SystemErr.log"
+
+appserver_jvm_log_command_line_arguments: '{{ appserver_node_name }} {{ appserver_name }} {{ appserver_log_rollover_size_output }} {{ appserver_log_max_backup_files_output }} {{ appserver_log_rollover_size_error }} {{ appserver_log_max_backup_files_error }} {{ appserver_log_output_filename }} {{ appserver_log_error_filename }}'
+
+# Arguments Trace Logs
+appserver_trace_log_filename: "/vpapp/logs/{{ appserver_bank_identifier }}/CG3-AccesspointeII/trace.log"
+appserver_trace_log_max_backup_files: "20"
+appserver_trace_log_rollover_size: "10"
+
+appserver_trace_log_command_line_arguments: '{{ appserver_node_name }} {{ appserver_name }} {{ appserver_trace_log_filename }} {{ appserver_trace_log_max_backup_files }} {{ appserver_trace_log_rollover_size }}'
+
+# Arguments for IBM Service Logs
+appserver_service_log_size: "25"
+appserver_service_log_filename: "/vpapp/logs/{{ appserver_bank_identifier }}/CG3-AccesspointeII/activity.log"
+appserver_service_log_enabled: "EMPTY"
+
+appserver_service_log_command_line_arguments: '{{ appserver_node_name }} {{ appserver_name }} {{ appserver_service_log_filename }} {{ appserver_service_log_size }} {{ appserver_service_log_enabled }}'
+
+# Arguments for UMASK
+appserver_umask_process_priority: "EMPTY"
+appserver_umask_run_as_group: "EMPTY"
+appserver_umask_run_as_user: "EMPTY"
+appserver_umask_run_in_process_group: "EMPTY"
+appserver_umask_value: "027"
+
+appserver_umask_command_line_arguments: '{{ appserver_node_name }} {{ appserver_name }} {{ appserver_umask_process_priority }} {{ appserver_umask_run_as_group }} {{ appserver_umask_run_as_user }} {{ appserver_umask_run_in_process_group }} {{ appserver_umask_value }}'
+
+# virtual host creation
+
+dmgr_cell: "{{ profile_name }}Cell" #'sc-q-autwas02DmgrCell' 
+virtual_host_name: "{{ appserver_bank_identifier }}_APII_host"
+
+command_line_arg_virtualhost_creation: '{{ dmgr_cell }} {{ virtual_host_name }}'
+
+# virtual host port updation
+
+default_secure_port: "{{ APPSERVER_WC_defaulthost_secure }}" # '9220'
+# default_wc_host: "{{ APPSERVER_WC_defaulthost}}"
+sit_port: '65443'
+internal_ihs_port: '11443'
+customer_facing_port: '443'
+
+# if you want to add more ports just add the varibale name give that var in below command by comma separated.
+command_line_arg_virtualhost_port_updation: '{{ virtual_host_name }} {{ default_secure_port }},{{ sit_port }},{{ internal_ihs_port }},{{ customer_facing_port }}'
+
+# Arguments for Webcontainer Transport Chain
+appserver_wtc_enable_value: "false"
+appserver_wtc_chain_names: "'HttpQueueInboundDefault(','WCInboundDefault(','WCInboundAdmin('"
+
+appserver_wtc_command_line_arguments: '{{ appserver_name }} {{ appserver_wtc_enable_value }} {{ appserver_wtc_chain_names }}'
+
+# Argument custom properties
+appserver_custom_property_name: "com.ibm.ws.webcontainer.channelwritetype"
+appserver_custom_property_value: "sync"
+appserver_custom_property_description: "EMPTY"
+
+appserver_custom_properties_command_line_arguments: '{{ appserver_custom_property_name }} {{ appserver_custom_property_value }} {{ appserver_custom_property_description }} {{ appserver_name }}'
+
+# Argument Process Logs
+appserver_process_stderr_filename: '/vapp/logs/{{ appserver_bank_identifier }}/CG3-AccesspointeII/native_stderr.log'
+appserver_process_stdout_filename: '/vapp/logs/{{ appserver_bank_identifier }}/CG3-AccesspointeII/native_stdout.log'
+
+appserver_process_logs_command_line_arguments: '{{ appserver_node_name }} {{ appserver_name }} {{ appserver_process_stderr_filename }} {{ appserver_process_stdout_filename }}'
+
+# Argument Shared Library
+appserver_shared_library_cell_name: "{{ inventory_hostname }}DmgrCell"
+appserver_shared_library_name: "{{ inventory_hostname }}SharedLibrary"
+appserver_shared_library_class_path: "/vpapp/{{ appserver_bank_identifier }}/CG3-AccesspointeII/config"
+appserver_shared_library_native_path: "EMPTY"
+appserver_shared_library_isolated_class_loader: false
+appserver_shared_library_description: "EMPTY"
+
+appserver_shared_library_command_line_arguments: '{{ appserver_shared_library_cell_name }} {{ appserver_node_name }} {{ appserver_name }} {{ appserver_shared_library_name }} {{ appserver_shared_library_class_path }} {{ appserver_shared_library_native_path }} {{ appserver_shared_library_isolated_class_loader }} {{ appserver_shared_library_description }}'
+
+# template_path: "{{ was_base_path }}/profileTemplates/management"
+dmgr_profile_name: "{{ profile_name }}"
+dmgr_profile_path: "{{ was_base_path }}/profiles/{{ dmgr_profile_name }}"
+dmgr_cell_name: "{{ inventory_hostname }}Dmgr03Cell"
+dmgr_node_name: "{{ inventory_hostname }}DmgrNode"
+dmgr_starting_port: "9000"
+dmgr_port_file_path: "{{ was_ports_dir }}/dmgr_portdef.props"
+dmgr_response_file: "{{ bin_directory }}/was_create_dmgr_profile.rsp"
+dmgr_template_file: "was_create_dmgr_profile.rsp.j2"
+
+bank_identifier_dmgr: "{{ bank_id }}"
+
+# DMGR JVM Arguments
+dmgr_server_name: dmgr
+dmgr_initial_heap_size: EMPTY
+dmgr_maximum_heap_size: EMPTY
+dmgr_generic_jvm_arguments:  "-Dcom.sun.jndi.ldap.object.disableEndpointIdentification=true -verbose:gc" #verbose:gc
+dmgr_debug_arguments: "-Djava.compiler=NONE -Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=7777"
+dmgr_classpath: EMPTY
+dmgr_verbose_mode_gc: false
+
+dmgr_jvm_command_line_arguments: '{{ dmgr_server_name }} "{{ dmgr_generic_jvm_arguments }}" {{ dmgr_verbose_mode_gc }} "{{ dmgr_debug_arguments }}" {{ dmgr_classpath }} {{ dmgr_initial_heap_size }} {{ dmgr_maximum_heap_size }}'
+
+# Arguments JVM Logs
+dmgr_log_rollover_size_output: "50"
+dmgr_log_max_backup_files_output: "200"
+dmgr_log_rollover_size_error: "50"
+dmgr_log_max_backup_files_error: "200"
+dmgr_log_output_filename: "EMPTY"
+dmgr_log_error_filename: "EMPTY"
+
+dmgr_jvm_log_command_line_arguments: '{{ dmgr_node_name }} {{ dmgr_server_name }} {{ dmgr_log_rollover_size_output }} {{ dmgr_log_max_backup_files_output }} {{ dmgr_log_rollover_size_error }} {{ dmgr_log_max_backup_files_error }} {{ dmgr_log_output_filename }} {{ dmgr_log_error_filename }}'
+
+# Arguments Trace Logs
+dmgr_trace_log_filename: "EMPTY"
+dmgr_trace_log_max_backup_files: "20"
+dmgr_trace_log_rollover_size: "10"
+
+dmgr_trace_log_command_line_arguments: '{{ dmgr_node_name }} {{ dmgr_server_name }} {{ dmgr_trace_log_filename }} {{ dmgr_trace_log_max_backup_files }} {{ dmgr_trace_log_rollover_size }}'
+
+# Arguments for IBM Service Logs
+dmgr_service_log_size: "25"
+dmgr_service_log_filename: "${LOG_ROOT}/activity.log" #"EMPTY"
+dmgr_service_log_enabled: "EMPTY"
+
+dmgr_service_log_command_line_arguments: '{{ dmgr_node_name }} {{ dmgr_server_name }} {{ dmgr_service_log_filename }} {{ dmgr_service_log_size }} {{ dmgr_service_log_enabled }}'
+
+# Arguments for UMASK
+dmgr_umask_process_priority: "EMPTY"
+dmgr_umask_run_as_group: "EMPTY"
+dmgr_umask_run_as_user: "EMPTY"
+dmgr_umask_run_in_process_group: "EMPTY"
+dmgr_umask_value: "027"
+
+dmgr_umask_command_line_arguments: '{{ dmgr_node_name }} {{ dmgr_server_name }} {{ dmgr_umask_process_priority }} {{ dmgr_umask_run_as_group }} {{ dmgr_umask_run_as_user }} {{ dmgr_umask_run_in_process_group }} {{ dmgr_umask_value }}'
+
+# Arguments for Webcontainer Transport Chain
+dmgr_wtc_enable_value: "false"
+dmgr_wtc_chain_names: "'WCInboundAdmin('" # "'HttpQueueInboundDefault(','WCInboundDefault('"
+
+dmgr_wtc_command_line_arguments: '{{ dmgr_server_name }} {{ dmgr_wtc_enable_value }} {{ dmgr_wtc_chain_names }}'
+
+# AdminConfig.modify('(cells/sc-q-autwas02DmgrCell/nodes/sc-q-autwas02DmgrNode/servers/dmgr|server.xml#Chain_1)', '[[name "WCInboundAdmin"] [enable "false"]]')
+
+# Arguments for Extended Repository Service
+dmgr_auto_checkpoints_depth: "5"
+dmgr_auto_checkpoints_enabled: true
+dmgr_checkpoint_root: "EMPTY"
+
+dmgr_extended_repository_service_command_line_arguments: '{{ dmgr_auto_checkpoints_depth }} {{ dmgr_auto_checkpoints_enabled }} {{ dmgr_checkpoint_root }}'
+
+# Arguments for SSO
+dmgr_sso_property_value: false
+
+dmgr_sso_command_line_arguments: '{{ dmgr_sso_property_value }}'
+
+# template_path: "{{ was_base_path }}/profileTemplates/managed"
+nodeagent_profile_name: "{{ inventory_hostname }}"
+nodeagent_profile_path: "{{ was_base_path }}/profiles/{{ nodeagent_profile_name }}"
+nodeagent_cell_name: "{{ inventory_hostname }}Cell03"
+nodeagent_node_name: "{{ inventory_hostname }}Node"
+nodeagent_dmgr_portnum: 9879 #Management SOAP connector port
+nodeagent_port_file_path: "{{ was_ports_dir }}/nodeagent_portdef.props"
+nodeagent_response_file: "{{ bin_directory }}/was_create_nodeagent_profile.rsp"
+nodeagent_template_file: "was_create_nodeagent_profile.rsp.j2"
+
+bank_identifier_nodeagent: "{{ bank_id }}"
+
+# Nodeagent JVM Arguments
+nodeagent_server_name: nodeagent
+nodeagent_initial_heap_size: "512"
+nodeagent_maximum_heap_size: "2048"
+nodeagent_generic_jvm_arguments: "-Dcom.sun.jndi.ldap.object.disableEndpointIdentification=true -verbose:gc"
+nodeagent_debug_arguments: "-Djava.compiler=NONE -Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=7777"
+nodeagent_classpath: "classpath111"
+nodeagent_verbose_mode_gc: 'false'
+
+nodeagent_jvm_command_line_arguments: '{{ nodeagent_server_name }} "{{ nodeagent_generic_jvm_arguments }}" {{ nodeagent_verbose_mode_gc }} "{{ nodeagent_debug_arguments }}" {{ nodeagent_classpath }} {{ nodeagent_initial_heap_size }} {{ nodeagent_maximum_heap_size }}'
+
+# Arguments JVM Logs
+nodeagent_log_rollover_size_output: "50"
+nodeagent_log_max_backup_files_output: "200"
+nodeagent_log_rollover_size_error: "50"
+nodeagent_log_max_backup_files_error: "200"
+nodeagent_log_output_filename: "EMPTY"
+nodeagent_log_error_filename: "EMPTY"
+
+nodeagent_jvm_log_command_line_arguments: '{{ nodeagent_node_name }} {{ nodeagent_server_name }} {{ nodeagent_log_rollover_size_output }} {{ nodeagent_log_max_backup_files_output }} {{ nodeagent_log_rollover_size_error }} {{ nodeagent_log_max_backup_files_error }} {{ nodeagent_log_output_filename }} {{ nodeagent_log_error_filename }}'
+
+# Arguments Trace Logs
+nodeagent_trace_log_filename: "EMPTY"
+nodeagent_trace_log_max_backup_files: "20"
+nodeagent_trace_log_rollover_size: "10"
+
+nodeagent_trace_log_command_line_arguments: '{{ nodeagent_node_name }} {{ nodeagent_server_name }} {{ nodeagent_trace_log_filename }} {{ nodeagent_trace_log_max_backup_files }} {{ nodeagent_trace_log_rollover_size }}'
+
+# Arguments for IBM Service Logs
+nodeagent_service_log_size: "25"
+nodeagent_service_log_filename: "${LOG_ROOT}/activity.log"  #"EMPTY"
+nodeagent_service_log_enabled: "EMPTY"
+
+nodeagent_service_log_command_line_arguments: '{{ nodeagent_node_name }} {{ nodeagent_server_name }} {{ nodeagent_service_log_filename }} {{ nodeagent_service_log_size }} {{ nodeagent_service_log_enabled }}'
+
+# Arguments for UMASK
+nodeagent_umask_process_priority: "EMPTY"
+nodeagent_umask_run_as_group: "EMPTY"
+nodeagent_umask_run_as_user: "EMPTY"
+nodeagent_umask_run_in_process_group: "EMPTY"
+nodeagent_umask_value: "027"
+
+nodeagent_umask_command_line_arguments: '{{ nodeagent_node_name }} {{ nodeagent_server_name }} {{ nodeagent_umask_process_priority }} {{ nodeagent_umask_run_as_group }} {{ nodeagent_umask_run_as_user }} {{ nodeagent_umask_run_in_process_group }} {{ nodeagent_umask_value }}'
+###################
+# Port definitions for Application Server
+APPSERVER_BOOTSTRAP_ADDRESS: 9200
+APPSERVER_CSIV2_SSL_MUTUALAUTH_LISTENER_ADDRESS: 9202
+APPSERVER_CSIV2_SSL_SERVERAUTH_LISTENER_ADDRESS: 9203
+APPSERVER_DCS_UNICAST_ADDRESS: 9204
+APPSERVER_IPC_CONNECTOR_ADDRESS: 9205
+APPSERVER_ORB_LISTENER_ADDRESS: 9206
+APPSERVER_OVERLAY_TCP_LISTENER_ADDRESS: 9207
+APPSERVER_OVERLAY_UDP_LISTENER_ADDRESS: 9208
+APPSERVER_SAS_SSL_SERVERAUTH_LISTENER_ADDRESS: 9209
+APPSERVER_SIB_ENDPOINT_ADDRESS: 9210
+APPSERVER_SIB_ENDPOINT_SECURE_ADDRESS: 9211
+APPSERVER_SIB_MQ_ENDPOINT_ADDRESS: 9212
+APPSERVER_SIB_MQ_ENDPOINT_SECURE_ADDRESS: 9213
+APPSERVER_SIP_DEFAULTHOST: 9214
+APPSERVER_SIP_DEFAULTHOST_SECURE: 9215
+APPSERVER_SOAP_CONNECTOR_ADDRESS: 9216
+APPSERVER_WC_adminhost: 9217
+APPSERVER_WC_adminhost_secure: 9218
+APPSERVER_WC_defaulthost: 9219
+APPSERVER_WC_defaulthost_secure: 9220
+
+# Port definitions for Deployment Manager
+DMGR_BOOTSTRAP_ADDRESS: 9001
+DMGR_CELL_DISCOVERY_ADDRESS: 9002
+DMGR_CSIV2_SSL_MUTUALAUTH_LISTENER_ADDRESS: 9003
+DMGR_CSIV2_SSL_SERVERAUTH_LISTENER_ADDRESS: 9004
+DMGR_DCS_UNICAST_ADDRESS: 9005
+DMGR_DataPowerMgr_inbound_secure: 9006
+DMGR_IPC_CONNECTOR_ADDRESS: 9007
+DMGR_ORB_LISTENER_ADDRESS: 9008
+DMGR_OVERLAY_TCP_LISTENER_ADDRESS: 9009
+DMGR_OVERLAY_UDP_LISTENER_ADDRESS: 9010
+DMGR_SAS_SSL_SERVERAUTH_LISTENER_ADDRESS: 9011
+DMGR_SOAP_CONNECTOR_ADDRESS: 9879
+DMGR_STATUS_LISTENER_ADDRESS: 9012
+DMGR_WC_adminhost: 9015
+DMGR_WC_adminhost_secure: 9043
+DMGR_XDAGENT_PORT: 9014
+
+# Port definitions for Deployment Manager
+NODEAGENT_BOOTSTRAP_ADDRESS: 9101
+NODEAGENT_CSIV2_SSL_MUTUALAUTH_LISTENER_ADDRESS: 9102
+NODEAGENT_CSIV2_SSL_SERVERAUTH_LISTENER_ADDRESS: 9103
+NODEAGENT_DCS_UNICAST_ADDRESS: 9104
+NODEAGENT_IPC_CONNECTOR_ADDRESS: 9105
+NODEAGENT_NODE_DISCOVERY_ADDRESS: 9106
+NODEAGENT_NODE_IPV6_MULTICAST_DISCOVERY_ADDRESS: 9107
+NODEAGENT_NODE_MULTICAST_DISCOVERY_ADDRESS: 9108
+NODEAGENT_ORB_LISTENER_ADDRESS: 9109
+NODEAGENT_OVERLAY_TCP_LISTENER_ADDRESS: 9110
+NODEAGENT_OVERLAY_UDP_LISTENER_ADDRESS: 9111
+NODEAGENT_SAS_SSL_SERVERAUTH_LISTENER_ADDRESS: 9112
+NODEAGENT_SOAP_CONNECTOR_ADDRESS: 9113
+NODEAGENT_XDAGENT_PORT: 9114
+
+
+##################### outside vars from role #############
+# primary user creation Arguments
+
+primary_admin_username: "{{ was_username }}"
+primary_admin_user_pass: "{{ was_password }}"
+
+command_line_arg_primary_adm_user: '{{ primary_admin_username }} {{ primary_admin_user_pass }}'
+
+## users creation
+users_list_json:
+  - username: Lakshmi
+    password: Welcome2VPT # for demo purpose only
+    email: Lakshmiviewpoint@viewpointe.com
+    roles: 
+      - "adminsecuritymanager"
+      - "administrator"
+      - "auditor"
+      - "configurator"
+      - "deployer"
+      - "iscadmins"
+      - "monitor"
+      - "operator"
+  - username: Ameer
+    password: Welcome2VPT # for demo purpose only
+    email: Ameerviewpoint@viewpointe.com
+    roles: 
+      - "adminsecuritymanager"
+      - "administrator"
+      - "auditor"
+  - username: Lori
+    password: Welcome2VPT # for demo purpose only
+    email: Loriviewpoint@viewpointe.com
+    roles: 
+      - "administrator"
+      - "monitor"
+      - "operator"
+# if you want to add more users you can replicate same like above users
+
+# Group creation arguments
+
+group_name: "SIT-Sceniq-SolutionEngineers@defaultRealm"
+group_description: "a_group_of_admins"
+command_line_arg_for_group: '{{ group_name }} {{ group_description }}'
+
+# Group role assigning arg
+# 'operator' 'deployer' 'monitor'
+group_role1: "operator"
+group_role2: "deployer"
+group_role3: "monitor"
+
+command_line_arg_for_role_assign_group: '{{ group_name }} {{ group_role1 }} {{ group_role2 }} {{ group_role3 }}'
+
+# if you want more roles you can add and update the command line variable
+
+#### soap client properties vars ####
+
+soap_client_props_file: "soap.client.props"
+properties_dir: "{{ was_base_path }}/profiles"
+
+#### Soap client encryption ######
+
+encoder_script: "../bin/PropFilePasswordEncoder.sh"
+
+#### Audit Loggining ###############
+
+### Audit monitor ########
+notification_name: "AuditNotificationMonitor2"
+email_list: "vpops@viewpointe.com(smtp-server.viewpointe.com)"
+
+command_line_arg_for_audit_monitor_notification: '{{ notification_name }} {{ email_list }}'
+
+### security Auditing ########
+
+audit_enabled: "true"
+audit_policy: "WARN"
+sign: "EMPTY" # default value is false
+encrypt: "EMPTY" # default value is false
+verbose: "true" # default value is true
+
+user_name_for_audit: "Lori" #this user you created in the above step
+user_pass_for_audit: "Welcome2VPT" # for demo purpose only
+
+command_line_arg_for_security_auditing: '{{ audit_enabled }} {{ audit_policy }} {{ user_name_for_audit }} {{ user_pass_for_audit }} {{ sign }} {{ encrypt }} {{ verbose }}'
+
+
+### Audit filter type creation ########
+
+filter_type_name: "Viewpointe_Required_Events"
+event_type: "SECURITY_AUTHN,SECURITY_MGMT_AUDIT,SECURITY_AUTHN_CREDS_MODIFY"
+outcome: "SUCCESS,FAILURE,REDIRECT,ERROR,DENIED,WARNING,INFO"
+
+command_line_arg_for_audit_filter_type: '{{ filter_type_name }} {{ event_type }} {{ outcome }}'
+
+###### Audit service provider #######
+provider_name: "auditServiceProviderImpl_1"
+wrap_behavior: "WRAP"
+max_logs: "255"
+max_file_size: "28"
+
+command_line_arg_for_audit_service_provider: '{{ provider_name }} {{ filter_type_name }} {{ wrap_behavior }} {{ max_logs }} {{ max_file_size }}'
+
+######## Encrypt audit logs ########
+certificate_filename: "wildcardWithChain-newpassword.p12"
+certificate_path: "/var/tmp"
+
+# "wildcard-cert" "/vpapp/WAS-securityaudit/wildcardWithChain-newpassword.p12" "CxlmKy5qKWw" "(cell):sc-q-autwas02DmgrCell" "wildcard-cert" "2048" "*.vptoarchive.org" "Viewpointe_Archive_service_LLC" "Service_Delivery" "Charlotte" "North_Carolina" "US" "365"
+# key store creation
+key_store_name: "wildcard-cert"
+key_store_location: "/vpapp/WAS-securityaudit/wildcardWithChain-newpassword.p12"
+key_store_password: "CxlmKy5qKWw" # for demo purpose only
+
+# Audit sign cert creation 
+key_store_scope: "(cell):{{ inventory_hostname }}DmgrCell"
+certificate_alias: "wildcard-cert"
+certificate_size: "2048"
+common_name: "*.vptoarchive.org"
+organization: "Viewpointe_Archive_service_LLC"
+organizational_unit: "Service_Delivery"
+locality: "Charlotte"
+state: "North_Carolina"
+country: "US"
+valid_days: "365"
+
+# enabling 
+enable_audit_encryption: "true"
+cert_alias: "wildcard-cert"
+autogen_cert: "false"
+import_cert: "false"
+
+command_line_arg_for_audit_record_ecrypt: '{{ key_store_name }} {{ key_store_location }} {{ key_store_password }} {{ key_store_scope }} {{ certificate_alias }} {{ certificate_size }} {{ common_name }} {{ organization }} {{ organizational_unit }} {{ locality }} {{ state }} {{ country }} {{ valid_days }} {{ enable_audit_encryption }} {{ cert_alias }} {{ autogen_cert }} {{ import_cert }}'
+############ audit record sigining ############
+signingKeyStoreRef: "KeyStore_1"
+enableAuditSigning: "true"
+signingCertAlias: "default"  ## here need to give the default keystore certificate alias which is created from SSL config (CellDefaultKeyStore) if wildcard_chain is created there it will update here
+
+command_line_arg_for_audit_record_signing: '{{ signingKeyStoreRef }} {{ enableAuditSigning }} {{ signingCertAlias }}'
+
+
+# Arguments for disabling JSP class reload
+enterprise_application_name: "" # "SinglePageApp_war"
+web_module_name: "SimpleWebApp"
+filename_app_related: "SinglePageApp.war" # Specify the EAR, WAR, JAR, or SAR module name
+reload_option: "No" # values Yes or No first letter captial
+
+command_line_arg_for_jsp_class_reload: '{{ enterprise_application_name }} {{ web_module_name }} {{ filename_app_related }} {{ reload_option }}'
+
+
+######
+
+log_status_file_dir: "/home/{{ was_username }}/logfile.txt"

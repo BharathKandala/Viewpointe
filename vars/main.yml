@@ -1,0 +1,141 @@
+# ---
+# was_username: "usb-cg3-qa-wasadmin" #"usb-cg3-qa-wasadmin"
+# was_password: "Welcome2ibm"
+# dmgr_profile_name: "{{ inventory_hostname }}Dmgr"
+# nodeagent_profile_name: "{{ inventory_hostname }}"
+
+# # was_server_start__servers:
+# #   - servera
+# #   - ST1-APII-sc-q-autwas02
+# #   - ST0-APII-sc-q-autwas02
+
+# # was_server_stop__servers: ["servera", "ST1-APII-sc-q-autwas02", "ST0-APII-sc-q-autwas02"]
+
+# # primary user creation Arguments
+
+# primary_admin_username: "{{ was_username }}" #"usb-cg3-qa-wasadmin"
+# primary_admin_user_pass: "{{ was_password }}" "Welcome2ibm"
+
+# command_line_arg_primary_adm_user: '{{ primary_admin_username }} {{ primary_admin_user_pass }}'
+
+
+# ## users creation
+# users_list_json:
+#   - username: chandra
+#     password: Welcome2ibm
+#     email: chandraviewpoint@viewpointe.com
+#   - username: bharath
+#     password: Welcome2ibm
+#     email: bharathviewpoint@viewpointe.com
+#   - username: prakash
+#     password: Welcome2ibm
+#     email: prakashviewpoint@viewpointe.com
+#   - username: Lorry
+#     password: Welcome2ibm
+#     email: Lorryviewpoint@viewpointe.com
+
+# # if you want to add more users you can replicate same like above users
+
+# # Group creation arguments
+
+# group_name: "SIT-Sceniq-SolutionEngineers@defaultRealm"
+# group_description: "a_group_of_admins"
+# command_line_arg_for_group: '{{ group_name }} {{ group_description }}'
+
+# # Group role assigning arg
+# # 'operator' 'deployer' 'monitor'
+# role1: "operator"
+# role2: "deployer"
+# role3: "monitor"
+
+# command_line_arg_for_role_assign_group: '{{ group_name }} {{ role1 }} {{ role2 }} {{ role3 }}'
+
+# # if you want more roles you can add and update the command line variable
+
+# #### soap client properties vars ####
+
+# soap_client_props_file: "soap.client.props"
+# was_base_path: "/usr/WebSphere9/AppServer"
+# properties_dir: "{{ was_base_path }}/profiles"
+
+# #### Soap client encryption ######
+
+# encoder_script: "../bin/PropFilePasswordEncoder.sh"
+
+# #### Audit Loggining ###############
+
+# ### Audit monitor ########
+# notification_name: "AuditNotificationMonitor2"
+# email_list: "vpops@viewpointe.com(smtp-server.viewpointe.com)"
+
+# command_line_arg_for_audit_monitor_notification: '{{ notification_name }} {{ email_list }}'
+
+# ### security Auditing ########
+
+# audit_enabled: "true"
+# audit_policy: "WARN"
+# sign: "EMPTY" # default value is false
+# encrypt: "EMPTY" # default value is false
+# verbose: "true" # default value is true
+
+# user_name_for_audit: "Lorry" #this user you created in the above step
+# user_pass_for_audit: "Welcome2ibm"
+
+# command_line_arg_for_security_auditing: '{{ audit_enabled }} {{ audit_policy }} {{ user_name_for_audit }} {{ user_pass_for_audit }} {{ sign }} {{ encrypt }} {{ verbose }}'
+
+
+# ### Audit filter type creation ########
+
+# filter_type_name: "Viewpointe_Required_Events"
+# event_type: "SECURITY_AUTHN,SECURITY_MGMT_AUDIT,SECURITY_AUTHN_CREDS_MODIFY"
+# outcome: "SUCCESS,FAILURE,REDIRECT,ERROR,DENIED,WARNING,INFO"
+
+# command_line_arg_for_audit_filter_type: '{{ filter_type_name }} {{ event_type }} {{ outcome }}'
+
+# ###### Audit service provider #######
+# provider_name: "auditServiceProviderImpl_1"
+# wrap_behavior: "WRAP"
+# max_logs: "255"
+# max_file_size: "28"
+
+# command_line_arg_for_audit_service_provider: '{{ provider_name }} {{ filter_type_name }} {{ wrap_behavior }} {{ max_logs }} {{ max_file_size }}'
+
+# ######## Encrypt audit logs ########
+# was_owner: "usb-cg3-qa-wasadmin"
+# was_group: "usb-was-grp"
+
+# certificate_filename: "wildcardWithChain-newpassword.p12"
+# certificate_path: "/var/tmp"
+
+# # "wildcard-cert" "/vpapp/WAS-securityaudit/wildcardWithChain-newpassword.p12" "CxlmKy5qKWw" "(cell):sc-q-autwas02DmgrCell" "wildcard-cert" "2048" "*.vptoarchive.org" "Viewpointe_Archive_service_LLC" "Service_Delivery" "Charlotte" "North_Carolina" "US" "365"
+# # key store creation
+# key_store_name: "wildcard-cert"
+# key_store_location: "/vpapp/WAS-securityaudit/wildcardWithChain-newpassword.p12"
+# key_store_password: "CxlmKy5qKWw"
+
+# # Audit sign cert creation 
+# key_store_scope: "(cell):sc-q-autwas02DmgrCell"
+# certificate_alias: "wildcard-cert"
+# certificate_size: "2048"
+# common_name: "*.vptoarchive.org"
+# organization: "Viewpointe_Archive_service_LLC"
+# organizational_unit: "Service_Delivery"
+# locality: "Charlotte"
+# state: "North_Carolina"
+# country: "US"
+# valid_days: "365"
+
+# # enabling 
+# enable_audit_encryption: "true"
+# cert_alias: "wildcard-cert"
+# autogen_cert: "false"
+# import_cert: "false"
+
+
+# command_line_arg_for_audit_record_ecrypt: '{{ key_store_name }} {{ key_store_location }} {{ key_store_password }} {{ key_store_scope }} {{ certificate_alias }} {{ certificate_size }} {{ common_name }} {{ organization }} {{ organizational_unit }} {{ locality }} {{ state }} {{ country }} {{ valid_days }} {{ enable_audit_encryption }} {{ cert_alias }} {{ autogen_cert }} {{ import_cert }}'
+# ############ audit record sigining ############
+# signingKeyStoreRef: "KeyStore_1"
+# enableAuditSigning: "true"
+# signingCertAlias: "default"  ## here need to give the default keystore certificate alias which is created from SSL config (CellDefaultKeyStore) if wildcard_chain is created there it will update here
+
+# command_line_arg_for_audit_record_signing: '{{ signingKeyStoreRef }} {{ enableAuditSigning }} {{ signingCertAlias }}'
