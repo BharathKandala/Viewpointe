@@ -1,0 +1,41 @@
+---
+- name: Get stats of a ports dir
+  ansible.builtin.stat:
+    path: "{{ was_ports_dir }}"
+  register: ports_dir
+
+- name: "Create a directory if it does not exist {{ was_ports_dir }}"
+  ansible.builtin.file:
+    path: "{{ was_ports_dir }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ was_owner }}"
+    group: "{{ was_group }}"
+  when: not ports_dir.stat.exists
+
+- name: Get stats of a ports dir
+  ansible.builtin.stat:
+    path: "{{ was_ports_dir }}"
+  register: ports_dir_stat
+
+- name: Copy port files with owner and permissions
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: "{{ was_ports_dir }}/{{ item | replace('.j2', '.props') }}"
+    owner: "{{ was_owner }}"
+    group: "{{ was_group }}"
+    mode: '0755'
+  with_items: "{{ portdef_files }}"
+  when: ports_dir_stat.stat.exists
+
+- name: Include Create Profile DMGR
+  ansible.builtin.include_tasks: create_profile_dmgr.yml
+  when: config_ldap_reg is defined
+
+- name: Include Create Profile NodeAgent
+  ansible.builtin.include_tasks: create_profile_nodeagent.yml
+  when: create == "nodeagent"
+
+- name: Include Create Application Server
+  ansible.builtin.include_tasks: create_profile_appserver.yml
+  when: create == "appserver"

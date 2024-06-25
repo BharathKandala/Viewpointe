@@ -1,0 +1,49 @@
+---
+- name: "Purge Response file"
+  ansible.builtin.file:
+    path: "{{ appserver_response_file }}"
+    state: absent
+
+- name: "Verifiy if Profile already exists"
+  ansible.builtin.stat:
+    path: "{{ was_base_path }}/profiles/{{ dmgr_profile_name }}"
+  register: profile_already_exists
+
+- name: Verify if pid file
+  ansible.builtin.shell: ps -p `cat "{{ was_base_path }}/profiles/{{ dmgr_profile_name }}/logs/dmgr/dmgr.pid"`
+  register: "dmgr_is_running"
+  ignore_errors: true
+  changed_when: dmgr_is_running.rc != 0
+
+- name: "Verifiy if application server is already configured"
+  ansible.builtin.stat:
+    path: "{{ appserver_response_file }}"
+  register: appserver_already_configured
+
+- name: "Generate Response file"
+  ansible.builtin.template:
+    src: "{{ appserver_template_file }}"
+    dest: "{{ appserver_response_file }}"
+    owner: "{{ was_owner }}"
+    group: "{{ was_group }}"
+    mode: '0755'
+  when: not appserver_already_configured.stat.exists
+
+- name: "Create Appliaction Server"
+  ansible.builtin.command: >
+    sh wsadmin.sh -lang jython -username {{ was_username }} -password {{ was_password }} -f {{ appserver_response_file }} {{ appserver_name }} {{ appserver_node_name }} {{ appserver_port_file_path }}
+  register: appserver_output_reg
+  args:
+    chdir: "{{ was_bin_dir }}"
+  changed_when: appserver_output_reg.rc == 0
+  when: not appserver_already_configured.stat.exists
+
+- name: Print the result of Application Server Configuration
+  ansible.builtin.debug:
+    msg: "{{ appserver_output_reg }}"
+  when: not appserver_already_configured.stat.exists
+
+- name: "Purge Response file"
+  ansible.builtin.file:
+    path: "{{ appserver_response_file }}"
+    state: absent

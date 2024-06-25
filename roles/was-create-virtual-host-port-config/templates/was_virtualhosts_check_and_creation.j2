@@ -1,0 +1,51 @@
+
+# Utility function to convert an AdminConfig list result to a Python list
+def toList(inStr):
+    if inStr.startswith('[') and inStr.endswith(']'):
+        inStr = inStr[1:-1]
+    return inStr.split()
+
+# Function to check if a virtual host exists
+def virtualHostExists(virtual_host_name):
+    virtualHosts = toList(AdminConfig.list("VirtualHost"))
+    for vh in virtualHosts:
+        try:
+            name = AdminConfig.showAttribute(vh, "name")
+            if name == virtual_host_name:
+                return True
+        except Exception as e:
+            print("Error retrieving name for virtual host %s: %s" % (vh, str(e)))
+    return False
+
+# Function to create a virtual host if it doesn't exist
+def create_virtual_host(dmgr_cell, virtual_host_name):
+    if virtualHostExists(virtual_host_name):
+        print("Virtual host '%s' already exists. Skipping creation." % virtual_host_name)
+        return
+    
+    print("Creating virtual host with name: %s in cell: %s" % (virtual_host_name, dmgr_cell))
+
+    cell = AdminConfig.getid('/Cell:' + dmgr_cell + '/')
+    if cell:
+        print("Found cell: %s" % cell)
+        try:
+            virtual_host = AdminConfig.create('VirtualHost', cell, [['name', virtual_host_name]])
+            print("Created virtual host: %s" % virtual_host)
+            
+            # Save the configuration
+            AdminConfig.save()
+            print("Configuration saved successfully.")
+        except Exception as e:
+            print("An error occurred while creating the virtual host: %s" % str(e))
+    else:
+        print("Error: Cell not found.")
+
+# Extracting command line arguments
+
+dmgr_cell = sys.argv[0]
+virtual_host_name = sys.argv[1]
+
+# Call the function to create the virtual host if it doesn't exist
+create_virtual_host(dmgr_cell, virtual_host_name)
+
+ #sh wsadmin.sh -lang jython -f file1.py 'sc-q-autwas02DmgrCell' 'VPOINTVH3'

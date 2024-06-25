@@ -1,0 +1,6 @@
+---
+log_dir: "/vpapp/logs/{{ bank_id }}/CG3-AccesspointeII"
+log_grp: "wasloggp"
+log_files:
+  - was_virtualhosts_check_and_creation.j2
+  - was_virtualhost_ports_updation.j2

@@ -1,0 +1,83 @@
+---
+- name: "Verifiy if Profile already exists"
+  ansible.builtin.stat:
+    path: "{{ was_base_path }}/profiles/{{ dmgr_profile_name }}"
+  register: profile_already_exists
+
+- name: Verify if pid file
+  ansible.builtin.shell: ps -p `cat "{{ was_base_path }}/profiles/{{ dmgr_profile_name }}/logs/dmgr/dmgr.pid"`
+  register: "noodeagent_is_running"
+  ignore_errors: true
+  failed_when: false
+  changed_when: noodeagent_is_running.rc != 0
+
+- name: "Verifiy if node agent is already created"
+  ansible.builtin.stat:
+    path: "{{ nodeagent_response_file }}"
+  register: nodeagent_already_created
+
+- name: "Generate Response file for node agent"
+  ansible.builtin.template:
+    src: "{{ nodeagent_template_file }}"
+    dest: "{{ nodeagent_response_file }}"
+    owner: "{{ was_owner }}"
+    group: "{{ was_group }}"
+    mode: '0755'
+  when: not nodeagent_already_created.stat.exists
+
+- name: "Create profile for node agent"
+  ansible.builtin.command: >
+    {{ was_base_path }}/bin/manageprofiles.sh -response {{ nodeagent_response_file }}
+  register: create_nodeagent_profile_output_reg
+  args:
+    chdir: "{{ bin_directory }}"
+  when: not nodeagent_already_created.stat.exists
+  changed_when: ( create_nodeagent_profile_output_reg.stdout.find('INSTCONFSUCCESS') != -1)
+  failed_when: ( create_nodeagent_profile_output_reg.stdout.find('INSTCONFFAILED') != -1)
+
+- name: Print the result of node agent
+  ansible.builtin.debug:
+    msg: "{{ create_nodeagent_profile_output_reg }}"
+  when: not nodeagent_already_created.stat.exists
+
+- name: "Verifiy if Profile is already created"
+  ansible.builtin.stat:
+    path: "{{ was_base_path }}/profiles/{{ profile_name }}/logs/AboutThisProfile.txt"
+  register: profile_log_aboutprofile
+
+- name: Display the Profile Details
+  ansible.builtin.command: "cat {{ was_base_path }}/profiles/{{ profile_name }}/logs/AboutThisProfile.txt"
+  register: profile_output
+  changed_when: profile_log_aboutprofile.stat.exists
+
+- name: Print the Profile Details
+  ansible.builtin.debug:
+    msg: "{{ profile_output }}"
+  when: profile_output.rc == 0
+
+- name: Status of Servers
+  ansible.builtin.command: "sh {{ was_base_path }}/profiles/{{ profile_name }}/bin/startServer.sh -all -username {{ was_username }} -password {{ was_password }}"
+  register: status_server
+  changed_when: status_server.rc == 0
+  failed_when: status_server.rc != 0
+
+- name: Print the result of start deployment manager
+  ansible.builtin.debug:
+    msg: "{{ status_server }}"
+  when: status_server.rc == 0
+
+# - name: Start Node Agent
+  # ansible.builtin.command: "sh {{ was_base_path }}/profiles/{{ profile_name }}/bin/startNode.sh -username {{ was_username }} -password {{ was_password }}"
+  # register: nodeagnet_start
+  # changed_when: nodeagnet_start.rc == 0
+  # failed_when: nodeagnet_start.rc != 0
+
+# - name: Print the result of start deployment manager
+  # ansible.builtin.debug:
+    # msg: "{{ nodeagnet_start }}"
+  # when: nodeagnet_start.rc == 0
+
+- name: "Purge Response file"
+  ansible.builtin.file:
+    path: "{{ nodeagent_response_file }}"
+    state: absent

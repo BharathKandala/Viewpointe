@@ -1,0 +1,21 @@
+---
+was_base_path: "/usr/WebSphere9/AppServer"
+was_username: "usb-cg3-qa-wasadmin"
+was_password: "Welcome2ibm"
+bin_directory: "{{ was_base_path }}/bin"
+was_owner: "usb-cg3-qa-wasadmin"
+was_group: "usb-was-grp"
+was_ports_dir: "/home/{{ was_username }}/ports_dir"
+app_server_portdef_files:
+  - appserver_portdef.props
+# ### Dmgr creation vars 
+# template_path: "{{ was_base_path }}/profileTemplates/management"
+# profile_name: "was_dmgr_custom_profile"
+# profile_path: "{{ was_base_path }}/profiles/{{ profile_name }}"
+# cell_name: "WASCell_{{ inventory_hostname }}"
+# node_name: "WASDmgr_{{ inventory_hostname }}"
+# dmgr_port: "8000"
+# port_file_path: /home/{{ was_username }}/installfiles/WAS9dmgr.portdef.props
+
+# response_file: "{{ bin_directory }}/was_create_dmgr_profile.rsp"
+# template_file: "was_create_dmgr_profile.rsp.j2"

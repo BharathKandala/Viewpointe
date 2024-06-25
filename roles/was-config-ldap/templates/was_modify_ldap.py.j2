@@ -1,0 +1,5 @@
+#AdminTask.updateIdMgrLDAPServer('[-primary_host {{ ldap_server }} -id {{ ldap_repo }} -host {{ ldap_server }} -bindAuthMechanism simple -bindDN {{ ldap_bind_user }} -bindPassword {{ ldap_bind_pass }} -referal ignore -sslEnabled {{ ssl_enabled_value }} -ldapServerType AD -sslConfiguration -certificateMapMode exactdn -certificateFilter -port 389]')
+
+print("LDAP is updated with new values")
+
+#AdminConfig.save()

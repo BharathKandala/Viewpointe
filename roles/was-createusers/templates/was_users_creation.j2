@@ -1,0 +1,36 @@
+import sys
+import json
+
+def create_user(uid, password, email):
+    try:
+        # Assuming the common name (cn) is the same as the user id and
+        # the surname (sn) is extracted from the email for simplicity
+        cn = uid
+        sn = email.split('@')[0]
+
+        AdminTask.createUser(['-uid', uid, 
+                              '-password', password, 
+                              '-confirmPassword', password, 
+                              '-cn', cn, 
+                              '-sn', sn, 
+                              '-mail', email])
+        AdminConfig.save()
+        print("User " + uid + " created successfully.")
+        print("Configuration saved successfully.")
+    except Exception as e:
+        print("Error creating user " + uid + ": " + str(e))
+
+try:
+    username = sys.argv[0]
+    password = sys.argv[1]
+    email = sys.argv[2]
+    create_user(username, password, email)
+except json.JSONDecodeError:
+    print("Error: Invalid JSON format.")
+except KeyError:
+    print("Error: JSON objects must contain 'username', 'password', and 'email' keys.")
+
+
+# sh wsadmin.sh -lang jython -username usb-cg3-qa-wasadmin -password Welcome2ibm -f file1.py '[{"username": "chandrasekhar", "password": "Welcome2ibm", "email": "chandrasekhar@netflix.com"}, {"username": "Ramesh", "password": "Welcome2ibmRamesh", "email": "Rameshviewpoint@viewpointe.com"}, {"username": "Lakshmi", "password": "Welcome2ibmLakshmi", "email": "Lakshmiviewpoint@viewpointe.com"}]'
+
+# sh wsadmin.sh -lang jython -username usb-cg3-qa-wasadmin -password Welcome2ibm -f file1.py '[{"username": "chandra", "password": "Welcome2ibm", "email": "chandra@netflix.com"}, {"username": "Sekhar", "password": "Welcome2ibmSekhar", "email": "Sekharviewpoint@viewpointe.com"}, {"username": "Lakshmix", "password": "Welcome2ibmLakshmix", "email": "Lakshmixviewpoint@viewpointe.com"}]'

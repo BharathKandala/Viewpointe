@@ -1,0 +1,46 @@
+---
+- name: "Verifiy if Profile already exists"
+  ansible.builtin.stat:
+    path: "{{ was_base_path }}/profiles/{{ profile_name }}"
+  register: profile_already_exists
+
+- name: Verify if pid file
+  ansible.builtin.shell: ps -p `cat "{{ was_base_path }}/profiles/{{ profile_name }}/logs/dmgr/dmgr.pid"`
+  register: "dmgr_is_running"
+  ignore_errors: true
+  changed_when: dmgr_is_running.rc != 0
+
+- name: "Check if stat exists {{ bin_directory }}"
+  ansible.builtin.stat:
+    path: "{{ bin_directory }}"
+  register: bin_dir
+
+- name: "Generate Response file"
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: "{{ bin_directory }}/{{ item | replace('.j2', '.py') }}"
+    owner: "{{ was_owner }}"
+    group: "{{ was_group }}"
+    mode: '0755'
+  when: bin_dir.stat.exists
+  with_items: "{{ log_files }}"
+
+
+- name: "Create Primary administrator user"
+  ansible.builtin.command: >
+    sh wsadmin.sh -lang jython -f {{ bin_directory }}/was_primary_adm_user_creation.py {{ command_line_arg_primary_adm_user }}
+  register: primary_admin_user_cre_reg
+  args:
+    chdir: "{{ bin_directory }}"
+  changed_when: primary_admin_user_cre_reg.rc == 0
+
+- name: Print the result of Creation of primary admin user
+  ansible.builtin.debug:
+    msg: "{{ primary_admin_user_cre_reg }}"
+  changed_when: "'Configuration saved successfully.' in primary_admin_user_cre_reg.stdout"
+
+- name: "Purge Response file"
+  ansible.builtin.file:
+    path: "{{ bin_directory }}/{{ item | replace('.j2', '.py') }}"
+    state: absent
+  with_items: "{{ log_files }}"

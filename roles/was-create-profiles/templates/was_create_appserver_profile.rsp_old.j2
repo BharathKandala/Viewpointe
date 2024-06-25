@@ -1,0 +1,80 @@
+import sys
+# Function to create Application Server
+def create_application_server(server_name, node_name):
+    nodeAgent = AdminControl.queryNames('type=NodeAgent,node=' + nodeName + ',process=nodeagent,*')
+    server = AdminTask.createApplicationServer(node_name, '-name ' + server_name + ' -templateName default')
+    AdminConfig.save()
+    print("Server '%s' created successfully on node '%s'" % (server_name, node_name))
+	
+def start_application_server(node_name, server_name):
+    try:
+        # Get the server object using AdminConfig
+        server_id = AdminConfig.getid('/Node:' + node_name + '/Server:' + server_name + '/')
+        if not server_id:
+            print("Server '%s' on node '%s' not found." % (server_name, node_name))
+            return
+
+        # Get the server status
+        server_status = AdminControl.queryNames('type=Server,node=' + node_name + ',name=' + server_name + ',*')
+        if server_status:
+            print("Server '%s' on node '%s' is already started." % (server_name, node_name))
+            return
+
+        # Start the server
+        print("Starting server '%s' on node '%s'..." % (server_name, node_name))
+        AdminControl.startServer(server_name, node_name)
+        print("Server '%s' on node '%s' has been started successfully." % (server_name, node_name))
+
+    except:
+        print("An error occurred while trying to start the server '%s' on node '%s'." % (server_name, node_name))
+        print(sys.exc_info())
+
+def modify_server_ports(server_name, node_name):
+	node = AdminConfig.getid('/Node:' + node_name + '/')
+	serverEntries = AdminConfig.list('ServerEntry', node).split(java.lang.System.getProperty('line.separator'))
+
+# Dictionary to map endpoint names to their corresponding port numbers
+	endpoint_ports = {
+		'BOOTSTRAP_ADDRESS': 8200,
+		'CSIV2_SSL_MUTUALAUTH_LISTENER_ADDRESS': 8202,
+		'CSIV2_SSL_SERVERAUTH_LISTENER_ADDRESS': 8203,
+		'DCS_UNICAST_ADDRESS': 8204,
+		'IPC_CONNECTOR_ADDRESS': 8205,
+		'ORB_LISTENER_ADDRESS': 8206,
+		'OVERLAY_TCP_LISTENER_ADDRESS': 8207,
+		'OVERLAY_UDP_LISTENER_ADDRESS': 8208,
+		'SAS_SSL_SERVERAUTH_LISTENER_ADDRESS': 8209,
+		'SIB_ENDPOINT_ADDRESS': 8210,
+		'SIB_ENDPOINT_SECURE_ADDRESS': 8211,
+		'SIB_MQ_ENDPOINT_ADDRESS': 8212,
+		'SIB_MQ_ENDPOINT_SECURE_ADDRESS': 8213,
+		'SIP_DEFAULTHOST': 8214,
+		'SIP_DEFAULTHOST_SECURE': 8215,
+		'SOAP_CONNECTOR_ADDRESS': 8216,
+		'WC_adminhost': 8217,
+		'WC_adminhost_secure': 8218,
+		'WC_defaulthost': 8219,
+		'WC_defaulthost_secure': 8220
+	}
+
+	for serverEntry in serverEntries:
+		sName = AdminConfig.showAttribute(serverEntry, "serverName")
+		if sName == server_name:
+			sepString = AdminConfig.showAttribute(serverEntry, "specialEndpoints")
+			sepList = sepString[1:len(sepString)-1].split(" ")
+			for specialEndPoint in sepList:
+				endPointNm = AdminConfig.showAttribute(specialEndPoint, "endPointName")
+				if endPointNm in endpoint_ports:
+					ePoint = AdminConfig.showAttribute(specialEndPoint, "endPoint")
+					port_number = endpoint_ports[endPointNm]
+					AdminConfig.modify(ePoint, [["port", port_number]])
+	AdminConfig.save()
+
+# Example usage	
+server_name = sys.argv[0]
+node_name = sys.argv[1]
+
+# Call function
+create_application_server(server_name, node_name)
+start_application_server(node_name, server_name)
+modify_server_ports(server_name, node_name)

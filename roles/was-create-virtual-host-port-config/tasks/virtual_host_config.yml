@@ -1,0 +1,28 @@
+---
+- name: Configure logs in WAS
+  block:
+    - name: "Create Virtual host"
+      ansible.builtin.command: >
+        sh wsadmin.sh -lang jython -username {{ was_username }} -password {{ was_password }} -f {{ bin_directory }}/was_virtualhosts_check_and_creation.py {{ command_line_arg_virtualhost_creation }}
+      register: virtual_host_cre_reg
+      args:
+        chdir: "{{ bin_directory }}"
+      changed_when: virtual_host_cre_reg.rc == 0
+
+    - name: Print the result of Creation of Virtual host
+      ansible.builtin.debug:
+        msg: "{{ virtual_host_cre_reg }}"
+      changed_when: "'Configuration saved successfully.' in virtual_host_cre_reg.stdout"
+
+    - name: "Configure virtual host ports"
+      ansible.builtin.command: >
+        sh wsadmin.sh -lang jython -username {{ was_username }} -password {{ was_password }} -f {{ bin_directory }}/was_virtualhost_ports_updation.py {{ command_line_arg_virtualhost_port_updation }}
+      register: virtual_host_port_update_reg
+      args:
+        chdir: "{{ bin_directory }}"
+      changed_when: virtual_host_port_update_reg.rc == 0
+
+    - name: Print the result of virtaul host port updation
+      ansible.builtin.debug:
+        msg: "{{ virtual_host_port_update_reg }}"
+      changed_when: "'Configuration saved successfully.' in virtual_host_port_update_reg.stdout"

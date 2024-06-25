@@ -1,0 +1,15 @@
+import sys
+
+def apply_wizard_settings(primary_admin_username, primary_admin_user_pass):
+    command = "AdminTask.applyWizardSettings('[-secureApps true -secureLocalResources false -adminPassword " + primary_admin_user_pass + " -userRegistryType WIMUserRegistry -adminName " + primary_admin_username + " ]')"
+    
+    print(command)
+    exec(command)
+    AdminConfig.save()
+    print("Configuration saved successfully.")
+
+
+primary_admin_username = sys.argv[0]
+primary_admin_user_pass = sys.argv[1]
+apply_wizard_settings(primary_admin_username, primary_admin_user_pass)
+

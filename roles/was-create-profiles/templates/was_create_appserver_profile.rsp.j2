@@ -1,0 +1,84 @@
+import time
+import subprocess
+# Function to create Application Server
+def create_application_server(server_name, node_name):
+    nodeAgent = AdminControl.queryNames('type=NodeAgent,node=' + node_name + ',process=nodeagent,*')
+    server = AdminTask.createApplicationServer(node_name, '-name ' + server_name + ' -templateName default')
+    AdminConfig.save()
+    print("Server '%s' created successfully on node '%s'" % (server_name, node_name))
+	
+def get_pid_of_process(server_name):
+    try:
+        output = subprocess.check_output(['pgrep', server_name])
+        pid = int(output.strip())
+        return pid
+    except subprocess.CalledProcessError:
+        return None
+	
+def start_application_server(node_name, server_name):
+    try:
+        # Get the server object using AdminConfig
+        server_id = AdminConfig.getid('/Node:' + node_name + '/Server:' + server_name + '/')
+        if not server_id:
+            print("Server '%s' on node '%s' not found." % (server_name, node_name))
+            return
+
+        # Get the server status
+        server_status = AdminControl.queryNames('type=Server,node=' + node_name + ',name=' + server_name + ',*')
+        if server_status:
+            print("Server '%s' on node '%s' is already started." % (server_name, node_name))
+            return
+
+        # Start the server
+        print("Starting server '%s' on node '%s'..." % (server_name, node_name))
+        AdminControl.startServer(server_name, node_name)
+        print("Server '%s' on node '%s' has been started successfully." % (server_name, node_name))
+
+    except:
+        print("An error occurred while trying to start the server '%s' on node '%s'." % (server_name, node_name))
+        print(sys.exc_info())
+
+def load_endpoint_ports(file_path):
+    endpoint_ports = {}
+    with open(file_path, 'r') as file:
+        for line in file:
+            if '=' in line:
+                key, value = line.strip().split('=')
+                endpoint_ports[key] = value
+    return endpoint_ports
+
+def modify_server_ports(server_name, node_name, file_path):
+    node = AdminConfig.getid('/Node:' + node_name + '/')
+    serverEntries = AdminConfig.list('ServerEntry', node).split(java.lang.System.getProperty('line.separator'))
+
+    # Load endpoint ports from file
+    endpoint_ports = load_endpoint_ports(file_path)
+
+    for serverEntry in serverEntries:
+        sName = AdminConfig.showAttribute(serverEntry, "serverName")
+        if sName == server_name:
+            sepString = AdminConfig.showAttribute(serverEntry, "specialEndpoints")
+            sepList = sepString[1:len(sepString)-1].split(" ")
+            for specialEndPoint in sepList:
+                endPointNm = AdminConfig.showAttribute(specialEndPoint, "endPointName")
+                if endPointNm in endpoint_ports:
+                    ePoint = AdminConfig.showAttribute(specialEndPoint, "endPoint")
+                    port_number = endpoint_ports[endPointNm]
+                    AdminConfig.modify(ePoint, [["port", port_number]])
+    AdminConfig.save()
+    print("Ports defined on Server '%s' successfully" % (server_name))
+
+# Example usage
+server_name = sys.argv[0]
+node_name = sys.argv[1]
+file_path = sys.argv[2]
+
+create_application_server(server_name, node_name)
+tmux_pid = get_pid_of_process(server_name)
+if tmux_pid:
+    print("PID of tmux: '%s'" % (tmux_pid))
+else:
+    print("'%s' is not running" % (server_name))
+    time.sleep(60) # Sleep for 60 seconds
+    start_application_server(node_name, server_name)
+modify_server_ports(server_name, node_name, file_path)
