@@ -2,8 +2,8 @@ master_config:
   hosts:
     sc-q-autwas01:
       ansible_host: 10.10.120.230
-      ansible_user: bharath.kandala-ibm
-      ansible_ssh_pass: JoelPrince@27 # for demo purpose
+      ansible_user: user
+      ansible_ssh_pass: ********** # for demo purpose
       ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
       was_base_path: "/usr/WebSphere9/AppServer"
       was_username: "usb-cg3-qa-wasadmin"
